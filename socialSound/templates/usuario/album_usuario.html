@@ -1,0 +1,17 @@
+{% load static %}
+<li>
+    {% if album.portada %}
+    <img src="{{ album.portada.url }}" alt="Portada de {{ album.titulo }}">
+    {% else %}
+    <img src="{% static 'cancion_portadas/image.png' %}" alt="Portada por defecto">
+    {% endif %}
+    <div class="album-info">
+        <p>Título: {{ album.titulo }}</p>
+        <p>Artista: {{ album.artista|upper }}</p>
+        <p>Género: {{ album.descripcion|lower }}</p>
+        <p>Fecha de subida: {{ album.fecha_subida|date:"d/m/Y"}}</p>
+        <a href="{% url 'detalle_album' album.id %}">Ver detalles</a> |
+        <a href="{% url 'canciones_album' album.id %}">Ver canciones</a> |
+        <a href="{% url 'comentarios_album' album.id %}">Comentarios</a>
+    </div>
+</li>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Álbum</title>
+
+</head>
+
+{% extends 'principal.html' %}
+
+<body>
+
+    {% block contenido %}
+
+
+    <div class="detalle-album">
+        <a href="{% url 'index' %}">Volver al inicio</a>
+        <a href="{% url 'feed' usuario.nombre_usuario %}">Volver al feed</a>
+
+        <h1>{{ album.titulo|default:"Título no disponible" }}</h1>
+
+        <div>
+            {% if detalles_album.productor and detalles_album.productor != "" %}
+            <p><strong>Productor:</strong> {{ detalles_album.productor }}</p>
+            {% else %}
+            <p><strong>Productor:</strong> No especificado</p>
+            {% endif %}
+
+            <p><strong>Número de pistas:</strong> {{ detalles_album.numero_pistas|default:"-" }}</p>
+            <p><strong>Estudio de grabación:</strong> {{ detalles_album.estudio_grabacion|default:"Desconocido" }}</p>
+            <p><strong>Sello discográfico:</strong> {{ detalles_album.sello_discografico|default:"Desconocido" }}</p>
+        </div>
+
+        <div class="statistics">
+            <p><strong>Likes:</strong>
+
+                {{ estadisticas_album.likes }}
+
+            </p>
+            <p><strong>Reproducciones:</strong> {{ estadisticas_album.reproducciones|floatformat }}</p>
+            <p><strong>Comentarios:</strong>
+                {% if estadisticas_album.comentarios == 0 %}
+                Sin comentarios aún.
+                {% else %}
+                {{ estadisticas_album.comentarios }}
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+
+    {% endblock %}
+
+</body>
+
+</html>

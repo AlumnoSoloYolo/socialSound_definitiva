@@ -1,0 +1,31 @@
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/header.css' %}">
+{% endblock %}
+
+<nav>
+    <figure>
+        <img src="{% static 'images/Logo.png' %}" alt="" class="logo">
+    </figure>
+    <ul>
+
+        <!--Perfil de Usuario (Ejemplo: lolo)-->
+        <li><a href="{% url 'perfil_usuario' 'lolo' %}"><i class="fa-solid fa-user-astronaut"></i></a></li>
+
+        <!--Feed de Usuario (Ejemplo: lolo)-->
+        <li><a href="{% url 'feed' 'lolo' %}"><i class="fa-solid fa-satellite-dish"></i></a></li>
+
+        <!--Lista de Álbumes (Ejemplo: lolo)-->
+        <li><a href="{% url 'lista_albumes' 'lolo' %}"><i class="fa-solid fa-shuttle-space"></i></a></li>
+
+
+        <!--Lista de Playlists (Ejemplo: lolo)-->
+        <li><a href="{% url 'lista_playlist' 'lolo' %}"><i class="fa-solid fa-newspaper"></i></a></li>
+
+
+        <!--Mensajes Privados (Ejemplo: Emisor 1, Receptor 2)-->
+        <li><a href="{% url 'mensajes_privados' 1 2 %}"><i class="fa-solid fa-satellite"></i></a></li>
+
+    </ul>
+</nav>

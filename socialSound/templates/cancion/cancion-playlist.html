@@ -1,0 +1,20 @@
+<li class="cancion">
+    <p><strong>Título:</strong> {{ cancion.titulo }}</p>
+    <p><strong>Etiqueta:</strong> {{ cancion.etiqueta }}</p>
+    <p><strong>Artista:</strong> {{ cancion.artista }}</p>
+    <audio controls>
+        <source src="{{ cancion.archivo_audio.url }}" type="audio/wav">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+    <p><strong>Likes:</strong> {{ cancion.like_set.count }}</p>
+
+
+    <p>Usuarios a los que les gustó esta canción:</p>
+    <ul>
+        {% for like in cancion.like_set.all %}
+        <li>{{ like.usuario.nombre_usuario }} ({{ like.fecha_like|date:"d/m/Y" }})</li>
+        {% empty %}
+        <li>No hay likes en esta canción.</li>
+        {% endfor %}
+    </ul>
+</li>

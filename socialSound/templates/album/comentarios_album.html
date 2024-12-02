@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% extends 'principal.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comentarios en {{ album.titulo }}</title>
+</head>
+
+<body>
+    {% block contenido %}
+    <div class="album-comment">
+        <a href="{% url 'index' %}">Volver al inicio</a>
+        <h1>Comentarios en: {{ album.titulo|default:"Título no disponible" }}</h1>
+
+        {% if album.usuario and album.usuario.nombre_usuario %}
+        <a href="{% url 'perfil_usuario' album.usuario.nombre_usuario %}">
+            <p>Publicado por: {{ album.usuario.nombre_usuario|default:"Usuario desconocido" }}</p>
+        </a>
+        {% else %}
+        <p>Publicado por: Usuario no especificado</p>
+        {% endif %}
+
+        <p>Descripción: {{ album.descripcion|linebreaks|default:"No hay descripción disponible." }}</p>
+        <p>Fecha de subida: {{ album.fecha_subida|date:"d/m/Y" }}</p>
+
+        <h2>Comentarios:</h2>
+        <ul>
+            {% if comentarios|length > 0 %}
+            {% for comentario in comentarios %}
+            {% include 'album/comentario.html' %}
+            {% endfor %}
+            {% else %}
+            <li>No hay comentarios para este álbum.</li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endblock %}
+</body>
+
+</html>

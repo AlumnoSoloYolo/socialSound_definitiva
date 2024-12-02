@@ -1,0 +1,16 @@
+<li>
+    <p>{{ cancion.titulo }}</p>
+    <audio controls>
+        <source src="{{ cancion.archivo_audio.url }}" type="audio/wav">
+    </audio>
+    <ul>
+        <li>
+            <a href="{% url 'detalle_cancion' cancion.id %}">Ver detalles</a>
+        </li>
+        <li>
+            <a href="{% url 'comentarios_album' album.id %}">Comentarios</a>
+        </li>
+    </ul>
+
+
+</li>

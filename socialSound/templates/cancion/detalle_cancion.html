@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles de la Canción</title>
+
+</head>
+
+
+{% extends 'principal.html' %}
+{% load static %}
+
+
+<body>
+
+    {% block contenido%}
+    <a href="{% url 'index' %}">Volver al inicio</a>
+
+    <h1>Detalles de la Canción: {{ cancion.titulo }}</h1>
+
+    {% if album.portada %}
+    <img src="{{ album.portada.url }}" alt="Portada de {{ cancion.titulo }}"
+        style="max-width: 200px; max-height: 200px;">
+    {% else %}
+    <img src="{% static 'cancion_portadas/image.png' %}" alt="Portada por defecto"
+        style="max-width: 200px; max-height: 200px;">
+    {% endif %}
+
+    <p><strong>Título:</strong> {{ cancion.titulo }}</p>
+    <p><strong>Letra:</strong> {{ detalles.letra }}</p>
+    <p><strong>Idioma:</strong> {{ detalles.idioma }}</p>
+    <p><strong>Duración:</strong> {{ detalles.duracion }}</p>
+    <p><strong>Créditos:</strong> {{ detalles.creditos |default:'Sin créditos' }}</p>
+
+    <a href="{% url 'canciones_album' album.id %}">Volver al álbum</a>
+    {% endblock %}
+
+</body>
+
+</html>

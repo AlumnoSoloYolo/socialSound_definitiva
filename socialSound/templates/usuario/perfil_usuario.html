@@ -1,0 +1,60 @@
+{% extends 'principal.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container my-5">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    {% if usuario.foto_perfil %}
+                    <img src="{{ usuario.foto_perfil.url }}" alt="Foto de perfil de {{ usuario.nombre_usuario }}"
+                        class="img-fluid rounded-circle mb-3">
+                    {% else %}
+                    <img src="{% static 'default_profile_image.jpg' %}" alt="Foto de perfil por defecto"
+                        class="img-fluid rounded-circle mb-3">
+                    {% endif %}
+                    <h5 class="card-title">{{ usuario.nombre_usuario }}</h5>
+                    <p class="card-text">Seguidores: {{ total_seguidores }} | Seguidos: {{ total_seguidos }}</p>
+                </div>
+                <div class="col-md-9">
+                    <p class="card-text">{{ usuario.bio }}</p>
+                    <p class="card-text"><small class="text-muted">{{ usuario.ciudad }}</small></p>
+                    <a href="{% url 'lista_playlist' usuario.nombre_usuario %}" class="btn btn-warning me-2">Ver
+                        playlists</a>
+                    <a href="{% url 'canciones_guardadas' usuario.nombre_usuario %}"
+                        class="btn btn-warning me-2">Canciones Guardadas</a>
+
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle mt-3" type="button" id="profileDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Options
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item"
+                                    href="{% url 'actualizar_perfil' usuario.nombre_usuario %}">Actualizar perfil</a>
+                            </li>
+                            <li><a class="dropdown-item"
+                                    href="{% url 'eliminar_usuario' usuario.nombre_usuario %}">Borrar cuenta</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h3>Álbumes subidos ({{ total_albumes }})</h3>
+        <div class="row">
+            {% for album in albumes %}
+            <div class="col-md-4 mb-3">
+                {% include 'usuario/album_usuario.html' %}
+            </div>
+            {% empty %}
+            <p>No hay álbumes subidos por este usuario.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

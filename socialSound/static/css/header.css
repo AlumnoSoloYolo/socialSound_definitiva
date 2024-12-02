@@ -1,0 +1,98 @@
+/* Estilo general del nav */
+nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgb(255, 200, 0); /* Naranja brillante */
+    padding: 10px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
+
+/* Figura del logo */
+nav figure {
+    width: auto;
+    height: 80px; /* Ajusta la altura del logo */
+}
+
+/* Logo ajustado */
+nav img {
+    display: block;
+    width: auto;
+    height: 100%; /* Se adapta al contenedor */
+    max-height: 80px; /* Limita la altura del logo */
+}
+
+/* Estilos de la lista de navegación */
+nav ul {
+    display: flex;
+    justify-content: space-around; /* Distribuye los elementos */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Estilo para cada item de la lista */
+nav ul li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    transition: transform 0.3s ease, background-color 0.3s ease; /* Añade animaciones */
+    border-radius: 5px; /* Bordes redondeados */
+}
+
+nav ul li:hover {
+    transform: scale(1.1); /* Escala el elemento al pasar el ratón */
+    background-color: rgba(0, 0, 0, 0.1); /* Fondo sutil al hacer hover */
+}
+
+/* Iconos dentro de los items */
+nav a {
+    display: block;
+    color: #000000;
+    font-size: 24px; /* Tamaño del icono */
+    text-decoration: none;
+}
+
+nav ul li a i {
+    color: #000; /* El color de los iconos también será negro */
+}
+
+nav a:hover {
+    color: rgb(255, 255, 255); /* Color blanco al hacer hover */
+}
+
+/* Estilo para el texto del link (si es necesario agregar texto además de iconos) */
+nav a span {
+    display: none;
+}
+
+/* Espaciado y ajuste de las áreas */
+nav figure, nav ul {
+    flex-grow: 1;
+}
+
+/* En dispositivos móviles, hacer que la navegación sea más accesible */
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        padding: 15px;
+    }
+
+    nav ul {
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+    }
+
+    nav ul li {
+        width: 100%; /* Cada enlace ocupa todo el ancho */
+        padding: 15px 0;
+        text-align: center;
+    }
+
+    nav figure img {
+        max-height: 60px; /* Logo más pequeño en pantallas pequeñas */
+    }
+}

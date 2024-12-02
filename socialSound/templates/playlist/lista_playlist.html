@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listas de Reproducción</title>
+
+</head>
+
+{% extends 'principal.html' %}
+
+<body>
+    {% block contenido %}
+    <a href="{% url 'index' %}">volver al inicio</a><br>
+    <a href="{% url 'perfil_usuario' usuario.nombre_usuario %}">volver al perfil de: {{ usuario.nombre_usuario }}</a>
+
+    <h1>Listas de Reproducción</h1>
+    <ul>
+
+        {% for playlist in playlists %}
+        {% include 'playlist/playlist.html' %}
+        {% empty %}
+        <li>No hay listas de reproducción disponibles.</li>
+        {% endfor %}
+
+    </ul>
+    {% endblock %}
+</body>
+
+</html>

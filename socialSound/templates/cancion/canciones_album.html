@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Canciones</title>
+    <style>
+        .canciones-fondo {
+            display: flex;
+            justify-content: center;
+            background-image: url('/static/images/punk-png.webp');
+            background-size: center;
+            background-repeat: no-repeat;
+            height: auto;
+        }
+
+        .canciones-album {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: auto;
+            padding: 20px;
+            margin-top: 50px;
+            width: 1000px;
+            background-color: rgb(205, 205, 205, 0.5);
+            box-shadow: -10px 0 15px rgba(0, 0, 0, 0.3), 10px 0 15px rgba(0, 0, 0, 0.3);
+
+        }
+
+
+        .canciones-album h1 {
+            color: #333;
+        }
+
+        .canciones-album h2 {
+            color: #666;
+            margin-top: 20px;
+        }
+
+        .canciones-album img {
+            display: block;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            max-width: 460px;
+            max-height: 460px;
+            box-shadow: -10px 0 15px rgba(0, 0, 0, 0.3), 10px 0 15px rgba(0, 0, 0, 0.3);
+
+        }
+
+        .canciones-album ul {
+            display: flex;
+            flex-direction: column;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .canciones-album li {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            width: 460px;
+        }
+
+        .canciones-album a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        .canciones-album a:hover {
+            text-decoration: underline;
+        }
+
+
+        .canciones-album .lista-canciones>li {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+{% extends 'principal.html' %}
+
+<body>
+
+    {% block contenido %}
+    <div class="canciones-fondo">
+        <div class="canciones-album">
+            <a href="{% url 'index' %}">volver al inicio</a>
+
+            <h1>Canciones de {{ album.titulo }}</h1>
+            <img src="{{ album.portada.url }}" alt="Portada de {{ cancion.titulo }}">
+
+            <ul class="lista-canciones">
+                {% for cancion in album.canciones.all %}
+                {% include 'cancion/cancion.html' %}
+                {% empty %}
+                <li>No hay canciones disponibles en este álbum.</li>
+                {% endfor %}
+            </ul>
+
+            <a href="{% url 'perfil_usuario' album.usuario.nombre_usuario %}">Volver al perfil</a>
+
+        </div>
+    </div>
+
+    {% endblock %}
+</body>
+
+</html>

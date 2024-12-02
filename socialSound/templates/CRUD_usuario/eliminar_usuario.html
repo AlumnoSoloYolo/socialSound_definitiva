@@ -1,0 +1,18 @@
+{% extends 'principal.html' %}
+{% load static %}
+
+{% block cabecera_extra %}
+<script type="text/javascript" src="{% static 'js/principal.js' %}"></script>
+{% endblock %}
+
+{% block contenido %}
+<div class="mb-2">
+    <form action="{% url 'eliminar_usuario' usuario.nombre_usuario %}" method="post">
+        {% crsf_token %}
+        <button class="btn btn-danger" onclick="return eliminar()" type="submit">
+            <span>{% bs_icon 'trash' %}</span>
+
+        </button>
+    </form>
+</div>
+{% endblock %}

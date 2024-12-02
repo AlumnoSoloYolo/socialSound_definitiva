@@ -1,0 +1,37 @@
+{% load static %}
+<li>
+    <h2>{{ album.titulo }}</h2>
+
+    {% if album.portada and album.portada.url %}
+    <img src="{{ album.portada.url }}" alt="Portada de {{ album.titulo }}" style="max-width: 200px; max-height: 200px;">
+    {% elif not album.portada %}
+    <img src="{% static 'album_portadas/image.svg' %}" alt="Portada por defecto"
+        style="max-width: 200px; max-height: 200px;">
+    {% endif %}
+
+
+    <p>Artista: {{ album.usuario.nombre_usuario }}</p>
+
+
+    {% if album.album.numero_pistas > 0 %}
+    <p>Productor: {{ album.album.productor|default:"No especificado" }}</p>
+    <p>Estudio de Grabación: {{ album.album.estudio_grabacion|default:"Desconocido" }}</p>
+    <p>Número de Pistas: {{ album.album.numero_pistas }}</p>
+    <p>Sello Discográfico: {{ album.album.sello_discografico|default:"Independiente" }}</p>
+    {% else %}
+    <p>Este álbum no tiene pistas disponibles.</p>
+    {% endif %}
+
+
+
+    <p>Fecha de Subida: {{ album.fecha_subida|date:"d/m/Y" }}</p>
+
+    <h3>Canciones:</h3>
+    <ul>
+        {% for cancion in album.canciones.all %}
+        {% include 'cancion/cancion.html' %}
+        {% empty %}
+        <li>No hay canciones en este álbum.</li>
+        {% endfor %}
+    </ul>
+</li>
