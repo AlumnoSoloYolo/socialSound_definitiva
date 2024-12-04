@@ -20,7 +20,10 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
-
+# URL a la que se redirige si un usuario no está autenticado
+LOGIN_URL = 'login_usuario'  # Nombre de tu URL de login
+LOGIN_REDIRECT_URL = 'perfil_usuario'  # Página a la que se redirige después del login
+LOGOUT_REDIRECT_URL = 'login_usuario'  # Página a la que se redirige después del logout
 
 
 

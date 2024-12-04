@@ -1,98 +1,156 @@
-/* Estilo general del nav */
-nav {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    background-color: rgb(255, 200, 0); /* Naranja brillante */
-    padding: 10px 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+/* Estilos base del navbar */
+.navbar {
+    background-color: #ffc107;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Figura del logo */
-nav figure {
-    width: auto;
-    height: 80px; /* Ajusta la altura del logo */
+
+.navbar-brand img {
+    height: 80px; 
+    transition: transform 0.3s ease;
 }
 
-/* Logo ajustado */
-nav img {
-    display: block;
-    width: auto;
-    height: 100%; /* Se adapta al contenedor */
-    max-height: 80px; /* Limita la altura del logo */
+.navbar-brand:hover img {
+    transform: scale(1.05);
 }
 
-/* Estilos de la lista de navegación */
-nav ul {
-    display: flex;
-    justify-content: space-around; /* Distribuye los elementos */
-    list-style: none;
-    padding: 0;
-    margin: 0;
+
+.nav-link {
+    color: #000;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    margin: 0 0.2rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
-/* Estilo para cada item de la lista */
-nav ul li {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-    transition: transform 0.3s ease, background-color 0.3s ease; /* Añade animaciones */
-    border-radius: 5px; /* Bordes redondeados */
+.nav-link:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #000;
 }
 
-nav ul li:hover {
-    transform: scale(1.1); /* Escala el elemento al pasar el ratón */
-    background-color: rgba(0, 0, 0, 0.1); /* Fondo sutil al hacer hover */
+.nav-link i {
+    margin-left: 6px;
+    font-size: 1.5rem;
 }
 
-/* Iconos dentro de los items */
-nav a {
-    display: block;
-    color: #000000;
-    font-size: 24px; /* Tamaño del icono */
-    text-decoration: none;
+.nav-item {
+    position: relative;
+  
+    margin-right: 2rem;
 }
 
-nav ul li a i {
-    color: #000; /* El color de los iconos también será negro */
+.user-dropdown{
+
+    margin-right: 0;
 }
 
-nav a:hover {
-    color: rgb(255, 255, 255); /* Color blanco al hacer hover */
+/* Estilos del tooltip */
+.nav-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+    z-index: 1000;
+    pointer-events: none;
 }
 
-/* Estilo para el texto del link (si es necesario agregar texto además de iconos) */
-nav a span {
-    display: none;
+.nav-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 5px 5px 5px;
+    border-style: solid;
+    border-color: transparent transparent #000 transparent;
 }
 
-/* Espaciado y ajuste de las áreas */
-nav figure, nav ul {
-    flex-grow: 1;
+.nav-item:hover .nav-tooltip {
+    opacity: 1;
+    visibility: visible;
 }
 
-/* En dispositivos móviles, hacer que la navegación sea más accesible */
-@media (max-width: 768px) {
-    nav {
-        flex-direction: column;
-        padding: 15px;
+/* Estilos del dropdown */
+.dropdown-menu {
+    background: #fff;
+    border: none;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 5;
+}
+
+.dropdown-item {
+    color: #000;
+    padding: 0.7rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 193, 7, 0.2);
+    color: #000;
+}
+
+/* Estilos específicos para el dropdown de usuario y no-usuario */
+.user-dropdown .nav-link,
+.no-user-dropdown .nav-link {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    padding: 0.5rem 1.2rem;
+}
+
+.user-dropdown .nav-link:hover,
+.no-user-dropdown .nav-link:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Asegurar que el dropdown de autenticación esté siempre a la derecha */
+.user-dropdown,
+.no-user-dropdown {
+    margin-left: auto;
+}
+
+/* Iconos en el navbar */
+.nav-icon {
+    width: 24px;
+    text-align: center;
+    margin-right: 8px;
+}
+
+/* Estilos responsive */
+@media (max-width: 991.98px) {
+    .user-dropdown,
+    .no-user-dropdown {
+        margin-left: 0;
+        margin-top: 1rem;
+    }
+    
+    .nav-tooltip {
+        display: none;
+    }
+    
+    .nav-link i {
+        margin-right: 1rem;
     }
 
-    nav ul {
-        flex-direction: column;
-        width: 100%;
-        align-items: center;
-    }
-
-    nav ul li {
-        width: 100%; /* Cada enlace ocupa todo el ancho */
-        padding: 15px 0;
-        text-align: center;
-    }
-
-    nav figure img {
-        max-height: 60px; /* Logo más pequeño en pantallas pequeñas */
+    /* Mejora del contraste en móvil */
+    .navbar-collapse {
+        background: #ffc107;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 0.5rem;
     }
 }

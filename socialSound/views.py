@@ -1,10 +1,15 @@
 from django.shortcuts import render, redirect
 from django.db.models import Sum, Q, Prefetch, Count
-from .models import Usuario, Album, Cancion, Playlist, Guardado, MensajePrivado, Comentario
+from .models import Usuario, Album, Cancion, Playlist, Guardado, MensajePrivado, Comentario, EstadisticasAlbum, DetalleAlbum
 from django.views.defaults import page_not_found
-from .forms import UsuarioModelForm, LoginForm
+from .forms import UsuarioModelForm, LoginForm, BusquedaAvanzadaUsuarioForm, AlbumModelForm, DetalleAlbumModelForm, BusquedaAvanzadaAlbumForm
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
+from dateutil.relativedelta import relativedelta
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from datetime import date
+from django.contrib.auth import logout
 
 
 ## CRUD Usuario
@@ -18,7 +23,7 @@ def registro_usuario(request):
             raw_password = form.cleaned_data.get('password')
             usuario.set_password(raw_password)
             usuario.save()
-            messages.success(request, 'registro existoso')
+            messages.success(request, '¡Te has registrado con éxito!', extra_tags='registro')
             return redirect('login_usuario')
         else:
             messages.error(request, 'Error en el registro de usuario')
@@ -27,8 +32,9 @@ def registro_usuario(request):
 
     return render(request, 'CRUD_usuario/registro_usuario.html', {
         'form': form,
-        'title': 'Registro d usuario'
+        'title': 'Registro de usuario'
     })
+
 
 def login_usuario(request):
     if request.method == 'POST':
@@ -49,7 +55,12 @@ def login_usuario(request):
 
     return render(request, 'CRUD_usuario/login_usuario.html', {'form': form})
 
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('login_usuario')
 
+@login_required
 def actualizar_perfil(request, nombre_usuario):
     usuario = Usuario.objects.get(nombre_usuario=nombre_usuario)
     if request.method == 'POST':
@@ -62,14 +73,213 @@ def actualizar_perfil(request, nombre_usuario):
         form = UsuarioModelForm(instance=usuario)
     return render(request, 'CRUD_usuario/actualizar_perfil.html', {'form': form, 'usuario': usuario})
 
-
+@login_required
 def eliminar_usuario(request, nombre_usuario):
     usuario = Usuario.objects.get(nombre_usuario=nombre_usuario)
     try:
         usuario.delete()
     except:
         pass
-    return redirect('registro_usuario')
+    return redirect('login_usuario')
+
+@login_required
+def busqueda_avanzada_usuarios(request):
+    form = BusquedaAvanzadaUsuarioForm(request.GET or None)
+    usuarios = Usuario.objects.all();
+    filtros_aplicados=[]
+
+    if form.is_valid():
+
+        if nombre_usuario := form.cleaned_data.get('nombre_usuario'):
+            usuarios = usuarios.filter(nombre_usuario__icontains=nombre_usuario)
+            filtros_aplicados.append(f"nombre: {nombre_usuario}")
+
+        if ciudad := form.cleaned_data.get('ciudad'):
+            usuarios=usuarios.filter(ciudad__icontains=ciudad)
+            filtros_aplicados.append(f"Ciudad: {ciudad}")
+        
+        if edad_min := form.cleaned_data.get('edad_min'):
+            fecha_min = date.today() - relativedelta(years=edad_min+1)
+            usuarios=usuarios.filter(fecha_nac__gte=fecha_min)
+            filtros_aplicados.append(f"Edad mínima: {edad_min} años")
+
+        if edad_max := form.cleaned_data.get('edad_max'):
+            fecha_min = date.today() - relativedelta(years=edad_max+1)
+            usuarios = usuarios.filter(fecha_nac__gte=fecha_min)
+            filtros_aplicados.append(f"Edad máxima: {edad_max} años")
+        
+        if bio := form.cleaned_data.get('bio_contains'):
+            usuarios = usuarios.filter(bio__icontains=bio)
+            filtros_aplicados.append(f"Biografía contiene: {bio}")
+        
+    return render(request, 'CRUD_usuario/busqueda_avanzada_usuarios.html', {
+            'form': form,
+            'usuarios': usuarios,
+            'filtros_aplicados': filtros_aplicados
+        })
+
+@login_required
+def seguir_usuario(request, usuario_id):
+    usuario_a_seguir = Usuario.objects.get(id=usuario_id)
+    request.user.seguir(usuario_a_seguir)
+    return redirect(request.META.get('HTTP_REFERER', reverse('busqueda_avanzada_usuarios')))
+
+@login_required
+def dejar_de_seguir_usuario(request, usuario_id):
+    usuario_a_dejar = Usuario.objects.get(id=usuario_id)
+    request.user.dejar_de_seguir(usuario_a_dejar)
+    return redirect(request.META.get('HTTP_REFERER', reverse('busqueda_avanzada_usuarios')))
+
+
+### CRUD Álbum
+
+@login_required
+def crear_album(request, nombre_usuario):
+    # Verificar que el usuario que está creando el álbum sea el mismo que está logueado
+    if request.user.nombre_usuario != nombre_usuario:
+        return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
+    
+    if request.method == 'POST':
+        album_form = AlbumModelForm(request.POST, request.FILES)
+        detalle_form = DetalleAlbumModelForm(request.POST)
+
+        # Depuración para verificar los datos recibidos
+        print("Datos recibidos para productor:", request.POST.get('productor'))
+        
+        if album_form.is_valid() and detalle_form.is_valid():
+            # Guardar el álbum sin comprometerlo aún
+            album = album_form.save(commit=False)
+            album.usuario = request.user
+            album.save()
+
+            # Crear también la estadística para el álbum
+            estadisticas_album = EstadisticasAlbum(album=album)
+            estadisticas_album.save()
+
+            # Guardar los detalles del álbum
+            detalleAlbum = detalle_form.save(commit=False)
+            detalleAlbum.album = album
+            detalleAlbum.save()
+
+            messages.success(request, 'Álbum creado correctamente.')
+            return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
+        else:
+            # Depuración para verificar los errores del formulario
+            print("Errores en el formulario:", detalle_form.errors)
+
+    else:
+        album_form = AlbumModelForm()
+        detalle_form = DetalleAlbumModelForm()
+        # Depuración para verificar los errores del formulario
+        print("Errores en el formulario:", detalle_form.errors)
+    
+    # Renderizar la plantilla con los formularios
+    return render(request, 'CRUD_album/crear_album.html', {
+        'album_form': album_form,
+        'detalle_form': detalle_form,
+        'title': 'Crear Nuevo Álbum',
+        'operation': 'Crear'
+    })
+
+
+
+@login_required
+def editar_album(request, nombre_usuario, album_id):
+    
+    album = Album.objects.select_related('detalle_album').get(id=album_id)
+    detalle = album.detalle_album
+  
+
+    if request.method == 'POST':
+       
+        album_form = AlbumModelForm(request.POST, request.FILES, instance=album)
+        detalle_form = DetalleAlbumModelForm(request.POST, instance=detalle)
+
+        if album_form.is_valid() and detalle_form.is_valid():
+           
+            album_form.save()
+            detalle_form.save()
+
+            messages.success(request, 'Álbum actualizado correctamente')
+            return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
+    else:
+        album_form = AlbumModelForm(instance=album)
+        detalle_form = DetalleAlbumModelForm(instance=detalle)
+
+    return render(request, 'CRUD_album/editar_album.html', {
+        'album_form': album_form,
+        'detalle_form': detalle_form,
+        'album': album,
+        'nombre_usuario': nombre_usuario,
+        'title': 'Editar Álbum',
+        'operation': 'Actualizar'
+    })
+
+
+
+
+@login_required
+def busqueda_avanzada_album(request):
+    form = BusquedaAvanzadaAlbumForm(request.GET or None)
+    
+    # Obtener usuarios seguidos por el usuario actual
+    usuarios_seguidos = request.user.obtener_seguidos()
+    
+    # Filtrar álbumes solo de usuarios seguidos
+    albums = Album.objects.filter(usuario__in=usuarios_seguidos)
+    filtros_aplicados = []
+
+    if form.is_valid():
+        if titulo := form.cleaned_data.get('titulo'):
+            albums = albums.filter(titulo__icontains=titulo)
+            filtros_aplicados.append(f"Título: {titulo}")
+        
+        if artista := form.cleaned_data.get('artista'):
+            albums = albums.filter(artista__icontains=artista)
+            filtros_aplicados.append(f"Artista: {artista}")
+        
+        if fecha_desde := form.cleaned_data.get('fecha_desde'):
+            albums = albums.filter(fecha_subida__gte=fecha_desde)
+            filtros_aplicados.append(f"fecha desde: {fecha_desde}")
+        
+        if fecha_hasta := form.cleaned_data.get('fecha_hasta'):
+            albums = albums.filter(fecha_subida__lte=fecha_hasta)
+            filtros_aplicados.append(f"fecha hasta: {fecha_hasta}")
+
+    return render(request, "CRUD_album/busqueda_avanzada_albumes.html", {
+        'form': form,
+        'albums': albums,
+        'filtros_aplicados': filtros_aplicados
+    })
+
+
+
+
+
+@login_required
+def eliminar_album(request, album_id):
+   
+    album = Album.objects.get(id=album_id)
+    
+    if request.user != album.usuario:
+        messages.error(request, 'No tienes permiso para eliminar este álbum.')
+        return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
+    
+    try:
+        if request.method == 'POST':
+           
+            nombre_album = album.titulo
+            album.delete()
+            messages.success(request, f'El álbum "{nombre_album}" ha sido eliminado correctamente.')
+    except Exception as e:
+        messages.error(request, 'Hubo un error al eliminar el álbum. Por favor, inténtalo de nuevo.')
+    
+    return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
+
+
+
+
+
 
        
     
@@ -135,6 +345,7 @@ def index(request):
 
 
 # 2. Mostrar el perfil del usuario
+@login_required
 def perfil_usuario(request, nombre_usuario):
     # Obtenemos el usuario por nombre de usuario
     usuario = Usuario.objects.get(nombre_usuario=nombre_usuario)
@@ -197,7 +408,7 @@ def detalle_album(request, album_id):
     # Obtenemos el álbum, usuario y detalles del album por separado
     album = Album.objects.get(id=album_id)
     usuario = album.usuario
-    detalles_album = album.album  # Información detallada del álbum (OneToOne)
+    detalles_album = album.detalle_album # Información detallada del álbum (OneToOne)
     estadisticas_album = album.estadisticasalbum  # Estadísticas del álbum (OneToOne)
 
     # Renderizamos plantilla con los detalles del álbum y las estadísticas

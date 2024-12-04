@@ -4,8 +4,16 @@ from .import views
 urlpatterns = [
      path('registro/', views.registro_usuario, name='registro_usuario'),
      path('login/', views.login_usuario, name='login_usuario'),
+     path('logout/', views.logout_view, name='logout'),
      path('perfil/<str:nombre_usuario>/actualizar/', views.actualizar_perfil, name='actualizar_perfil'),
      path('perfil/<str:nombre_usuario>/eliminar/', views.eliminar_usuario, name='eliminar_usuario'),
+     path('usuarios/busqueda-avanzada/', views.busqueda_avanzada_usuarios, name='busqueda_avanzada_usuarios'),
+     path('seguir/<int:usuario_id>/', views.seguir_usuario, name='seguir_usuario'),
+     path('dejar-de-seguir/<int:usuario_id>/', views.dejar_de_seguir_usuario, name='dejar_de_seguir_usuario'),
+     path('perfil/<str:nombre_usuario>/album/crear/', views.crear_album, name='crear_album'),
+     path('perfil/<str:nombre_usuario>/album/<int:album_id>/editar/', views.editar_album, name='editar_album'),
+     path('album/busqueda-avanzada/', views.busqueda_avanzada_album, name='busqueda_avanzada_albumes'),
+     path('album/<int:album_id>/eliminar/', views.eliminar_album, name='eliminar_album'),
 
 
 

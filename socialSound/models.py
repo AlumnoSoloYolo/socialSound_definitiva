@@ -88,7 +88,7 @@ class Album(models.Model):
 
 # Modelo Detalle del Álbum (OneToOne)
 class DetalleAlbum(models.Model):
-    album = models.OneToOneField(Album, on_delete=models.CASCADE, related_name='album')
+    album = models.OneToOneField(Album, on_delete=models.CASCADE, related_name='detalle_album')
     productor = models.CharField(max_length=200)
     estudio_grabacion = models.CharField(max_length=200, blank=True)
     numero_pistas = models.PositiveIntegerField()

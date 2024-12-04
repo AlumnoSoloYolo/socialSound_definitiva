@@ -1,17 +1,80 @@
 {% load static %}
-<li>
-    {% if album.portada %}
-    <img src="{{ album.portada.url }}" alt="Portada de {{ album.titulo }}">
-    {% else %}
-    <img src="{% static 'cancion_portadas/image.png' %}" alt="Portada por defecto">
-    {% endif %}
-    <div class="album-info">
-        <p>Título: {{ album.titulo }}</p>
-        <p>Artista: {{ album.artista|upper }}</p>
-        <p>Género: {{ album.descripcion|lower }}</p>
-        <p>Fecha de subida: {{ album.fecha_subida|date:"d/m/Y"}}</p>
-        <a href="{% url 'detalle_album' album.id %}">Ver detalles</a> |
-        <a href="{% url 'canciones_album' album.id %}">Ver canciones</a> |
-        <a href="{% url 'comentarios_album' album.id %}">Comentarios</a>
+<div class="col-md-4 mb-4">
+    <div class="card h-100 border-0 shadow-sm hover-shadow-lg transition-all">
+        <!-- Contenedor de imagen con ratio fijo -->
+        <div class="position-relative" style="padding-bottom: 100%;">
+            {% if album.portada %}
+                <img src="{{ album.portada.url }}" 
+                     class="position-absolute top-0 start-0 w-100 h-100"
+                     style="object-fit: cover;"
+                     alt="Portada de {{ album.titulo }}">
+            {% else %}
+                <img src="{% static 'cancion_portadas/image.png' %}" 
+                     class="position-absolute top-0 start-0 w-100 h-100"
+                     style="object-fit: cover;"
+                     alt="Portada por defecto">
+            {% endif %}
+        </div>
+        
+        <div class="card-body p-4">
+            <h5 class="card-title fw-bold mb-3">{{ album.titulo }}</h5>
+            <p class="card-text mb-2"><strong>Artista:</strong> {{ album.artista|upper }}</p>
+            {% if album.descripcion %}
+                <p class="card-text text-muted small mb-3">{{ album.descripcion|lower }}</p>
+            {% endif %}
+            <p class="card-text small text-muted mb-3">
+                <i class="bi bi-calendar"></i> {{ album.fecha_subida|date:"d/m/Y"}}
+            </p>
+
+            <!-- Botones principales -->
+            <div class="d-grid gap-2">
+                <a href="{% url 'detalle_album' album.id %}" class="btn btn-warning">
+                    <i class="bi bi-info-circle me-1"></i> Ver detalles
+                </a>
+                
+                <!-- Grupo de botones secundarios -->
+                <div class="btn-group w-100">
+                    <a href="{% url 'canciones_album' album.id %}" class="btn btn-outline-secondary flex-grow-1">
+                        <i class="bi bi-music-note-list me-1"></i> Canciones
+                    </a>
+                    <a href="{% url 'comentarios_album' album.id %}" class="btn btn-outline-secondary flex-grow-1">
+                        <i class="bi bi-chat me-1"></i> Comentarios
+                    </a>
+                </div>
+
+                <!-- Opciones de edición para el propietario -->
+                {% if request.user == usuario %}
+                    <div class="dropdown mt-2">
+                        <button class="btn btn-outline-secondary w-100 dropdown-toggle" 
+                                type="button" 
+                                data-bs-toggle="dropdown" 
+                                aria-expanded="false">
+                            <i class="fa-solid fa-gear me-1"></i> Opciones
+                        </button>
+                        <ul class="dropdown-menu w-100">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'editar_album' request.user.nombre_usuario album.id %}">
+                                    <i class="fa-solid fa-wrench me-2"></i> Editar Álbum
+                                </a>
+                            </li>
+                            {% if user == album.usuario %}
+                                <li>
+                                    <form id="deleteForm-{{ album.id }}" 
+                                          action="{% url 'eliminar_album' album.id %}" 
+                                          method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                class="dropdown-item text-danger"
+                                                onclick="return confirm('¿Estás seguro de que quieres eliminar el álbum {{ album.titulo }}? Esta acción eliminará también todas las canciones asociadas y no se puede deshacer.');">
+                                            <i class="fa-solid fa-trash me-2"></i> Eliminar
+                                        </button>
+                                    </form>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
-</li>
+</div>

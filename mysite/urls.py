@@ -23,6 +23,7 @@ from django.conf.urls import handler400,handler404,handler403,handler500
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include("socialSound.urls")),
+    
     path('__debug__/', include('debug_toolbar.urls')),
 ]
 

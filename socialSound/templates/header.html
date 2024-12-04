@@ -4,28 +4,87 @@
 <link rel="stylesheet" href="{% static 'css/header.css' %}">
 {% endblock %}
 
-<nav>
-    <figure>
-        <img src="{% static 'images/Logo.png' %}" alt="" class="logo">
-    </figure>
-    <ul>
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <img src="{% static 'images/Logo.png' %}" alt="Logo" class="logo">
+        </a>
 
-        <!--Perfil de Usuario (Ejemplo: lolo)-->
-        <li><a href="{% url 'perfil_usuario' 'lolo' %}"><i class="fa-solid fa-user-astronaut"></i></a></li>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <!--Feed de Usuario (Ejemplo: lolo)-->
-        <li><a href="{% url 'feed' 'lolo' %}"><i class="fa-solid fa-satellite-dish"></i></a></li>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'busqueda_avanzada_usuarios' %}">
+                            <i class="fa-brands fa-searchengin nav-icon"></i>
+                            <span class="nav-tooltip">Búsqueda de usuarios</span>
+                        </a>
+                    </li>
 
-        <!--Lista de Álbumes (Ejemplo: lolo)-->
-        <li><a href="{% url 'lista_albumes' 'lolo' %}"><i class="fa-solid fa-shuttle-space"></i></a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'perfil_usuario' request.user.nombre_usuario %}">
+                            <i class="fa-solid fa-user-astronaut nav-icon"></i>
+                            <span class="nav-tooltip">Mi perfil</span>
+                        </a>
+                    </li>
 
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'busqueda_avanzada_albumes' %}">
+                            <i class="fa-solid fa-satellite-dish nav-icon"></i>
+                            <span class="nav-tooltip">Feed</span>
+                        </a>
+                    </li>
 
-        <!--Lista de Playlists (Ejemplo: lolo)-->
-        <li><a href="{% url 'lista_playlist' 'lolo' %}"><i class="fa-solid fa-newspaper"></i></a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_albumes' request.user.nombre_usuario %}">
+                            <i class="fa-solid fa-shuttle-space nav-icon"></i>
+                            <span class="nav-tooltip">Mis álbumes</span>
+                        </a>
+                    </li>
 
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_playlist' request.user.nombre_usuario %}">
+                            <i class="fa-solid fa-newspaper nav-icon"></i>
+                            <span class="nav-tooltip">Mis playlists</span>
+                        </a>
+                    </li>
 
-        <!--Mensajes Privados (Ejemplo: Emisor 1, Receptor 2)-->
-        <li><a href="{% url 'mensajes_privados' 1 2 %}"><i class="fa-solid fa-satellite"></i></a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'mensajes_privados' 1 2 %}">
+                            <i class="fa-solid fa-satellite nav-icon"></i>
+                            <span class="nav-tooltip">Mensajes</span>
+                        </a>
+                    </li>
 
-    </ul>
+                    <li class="nav-item user-dropdown dropdown ms-3">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fa-solid fa-user nav-icon"></i>{{ user.nombre_usuario }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">
+                                <i class="fa-solid fa-right-from-bracket nav-icon"></i>Cerrar sesión
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item dropdown no-user-dropdown ms-auto">
+                        <a class="nav-link dropdown-toggle" href="#" id="authDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-user nav-icon"></i>Cuenta
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="z-index: 9999;">
+                            <li><a class="dropdown-item" href="{% url 'login_usuario' %}">
+                                <i class="fa-solid fa-right-to-bracket nav-icon"></i>Iniciar sesión
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'registro_usuario' %}">
+                                <i class="fa-solid fa-user-plus nav-icon"></i>Registrarse
+                            </a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
 </nav>
