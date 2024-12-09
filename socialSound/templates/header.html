@@ -33,15 +33,15 @@
 
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'busqueda_avanzada_albumes' %}">
-                            <i class="fa-solid fa-satellite-dish nav-icon"></i>
-                            <span class="nav-tooltip">Feed</span>
+                            <i class="fa-solid fa-shuttle-space nav-icon"></i>
+                            <span class="nav-tooltip">Buscar Álbumes</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'lista_albumes' request.user.nombre_usuario %}">
-                            <i class="fa-solid fa-shuttle-space nav-icon"></i>
-                            <span class="nav-tooltip">Mis álbumes</span>
+                        <a class="nav-link" href="{% url 'feed'  %}">
+                            <i class="fa-solid fa-satellite-dish nav-icon"></i>
+                            <span class="nav-tooltip">Feed</span>
                         </a>
                     </li>
 

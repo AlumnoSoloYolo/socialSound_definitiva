@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Sum, Q, Prefetch, Count
 from .models import Usuario, Album, Cancion, Playlist, Guardado, MensajePrivado, Comentario, EstadisticasAlbum, DetalleAlbum
 from django.views.defaults import page_not_found
-from .forms import UsuarioModelForm, LoginForm, BusquedaAvanzadaUsuarioForm, AlbumModelForm, DetalleAlbumModelForm, BusquedaAvanzadaAlbumForm
+from .forms import UsuarioModelForm, LoginForm, BusquedaAvanzadaUsuarioForm, AlbumModelForm, DetalleAlbumModelForm, BusquedaAvanzadaAlbumForm, ComentarioModelForm, BusquedaAvanzadaComentarioForm, CancionForm, DetallesCancionForm
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from dateutil.relativedelta import relativedelta
@@ -10,6 +10,8 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.contrib.auth import logout
+from django.db import transaction
+from django.forms import formset_factory
 
 
 ## CRUD Usuario
@@ -46,10 +48,10 @@ def login_usuario(request):
 
             if user is not None:
                 login(request, user)
-                messages.success(request, f'Bienvenido {user.nombre_usuario}')
+                messages.success(request, f'Bienvenido {user.nombre_usuario}', extra_tags='login')
                 return redirect('perfil_usuario', nombre_usuario=user.nombre_usuario)
             else:
-                messages.error(request, 'Credenciales inválidas') 
+                messages.error(request, 'Credenciales inválidas', extra_tags='error_credencialess') 
     else:
         form = LoginForm()
 
@@ -122,13 +124,13 @@ def busqueda_avanzada_usuarios(request):
 def seguir_usuario(request, usuario_id):
     usuario_a_seguir = Usuario.objects.get(id=usuario_id)
     request.user.seguir(usuario_a_seguir)
-    return redirect(request.META.get('HTTP_REFERER', reverse('busqueda_avanzada_usuarios')))
+    return render(request, 'parciales/boton_seguir.html', {'usuario': usuario_a_seguir})
 
 @login_required
 def dejar_de_seguir_usuario(request, usuario_id):
     usuario_a_dejar = Usuario.objects.get(id=usuario_id)
     request.user.dejar_de_seguir(usuario_a_dejar)
-    return redirect(request.META.get('HTTP_REFERER', reverse('busqueda_avanzada_usuarios')))
+    return render(request, 'parciales/boton_seguir.html', {'usuario': usuario_a_dejar})
 
 
 ### CRUD Álbum
@@ -143,20 +145,20 @@ def crear_album(request, nombre_usuario):
         album_form = AlbumModelForm(request.POST, request.FILES)
         detalle_form = DetalleAlbumModelForm(request.POST)
 
-        # Depuración para verificar los datos recibidos
+      
         print("Datos recibidos para productor:", request.POST.get('productor'))
         
         if album_form.is_valid() and detalle_form.is_valid():
-            # Guardar el álbum sin comprometerlo aún
+           
             album = album_form.save(commit=False)
             album.usuario = request.user
             album.save()
 
-            # Crear también la estadística para el álbum
+           
             estadisticas_album = EstadisticasAlbum(album=album)
             estadisticas_album.save()
 
-            # Guardar los detalles del álbum
+          
             detalleAlbum = detalle_form.save(commit=False)
             detalleAlbum.album = album
             detalleAlbum.save()
@@ -164,16 +166,16 @@ def crear_album(request, nombre_usuario):
             messages.success(request, 'Álbum creado correctamente.')
             return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
         else:
-            # Depuración para verificar los errores del formulario
+          
             print("Errores en el formulario:", detalle_form.errors)
 
     else:
         album_form = AlbumModelForm()
         detalle_form = DetalleAlbumModelForm()
-        # Depuración para verificar los errores del formulario
+        
         print("Errores en el formulario:", detalle_form.errors)
     
-    # Renderizar la plantilla con los formularios
+   
     return render(request, 'CRUD_album/crear_album.html', {
         'album_form': album_form,
         'detalle_form': detalle_form,
@@ -222,11 +224,8 @@ def editar_album(request, nombre_usuario, album_id):
 def busqueda_avanzada_album(request):
     form = BusquedaAvanzadaAlbumForm(request.GET or None)
     
-    # Obtener usuarios seguidos por el usuario actual
-    usuarios_seguidos = request.user.obtener_seguidos()
-    
-    # Filtrar álbumes solo de usuarios seguidos
-    albums = Album.objects.filter(usuario__in=usuarios_seguidos)
+    # Ahora empezamos con todos los álbumes
+    albums = Album.objects.all().select_related('usuario', 'detalle_album').order_by('-fecha_subida')
     filtros_aplicados = []
 
     if form.is_valid():
@@ -276,18 +275,176 @@ def eliminar_album(request, album_id):
     
     return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
 
+### CRUD cancion
+@login_required
+def crear_album_con_canciones(request, nombre_usuario):
+    if request.user.nombre_usuario != nombre_usuario:
+        return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
 
+    CancionFormSet = formset_factory(CancionForm, extra=1, can_delete=True)
+    DetallesCancionFormSet = formset_factory(DetallesCancionForm, extra=1, can_delete=True)
 
+    if request.method == 'POST':
+        album_form = AlbumModelForm(request.POST, request.FILES)
+        detalle_album_form = DetalleAlbumModelForm(request.POST)
+        cancion_formset = CancionFormSet(request.POST, request.FILES, prefix='canciones')
+        detalles_cancion_formset = DetallesCancionFormSet(request.POST, prefix='detalles')
 
+        if all([album_form.is_valid(), detalle_album_form.is_valid(), 
+               cancion_formset.is_valid(), detalles_cancion_formset.is_valid()]):
+            try:
+                with transaction.atomic():
+                    album = album_form.save(commit=False)
+                    album.usuario = request.user
+                    album.save()
 
+                    detalle_album = detalle_album_form.save(commit=False)
+                    detalle_album.album = album
+                    detalle_album.save()
 
+                    EstadisticasAlbum.objects.create(album=album)
+
+                    for cancion_form, detalles_form in zip(cancion_formset, detalles_cancion_formset):
+                        if cancion_form.cleaned_data and not cancion_form.cleaned_data.get('DELETE', False):
+                            cancion = cancion_form.save(commit=False)
+                            cancion.album = album
+                            cancion.usuario = request.user
+                            if not cancion_form.cleaned_data.get('portada'):
+                                cancion.portada = album.portada
+                            cancion.save()
+
+                            detalles = detalles_form.save(commit=False)
+                            detalles.cancion = cancion
+                            detalles.save()
+
+                messages.success(request, 'Álbum y canciones creados exitosamente')
+                return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
+            except Exception as e:
+                messages.error(request, f'Error al crear el álbum: {str(e)}')
+        else:
+            messages.error(request, 'Por favor, corrija los errores en el formulario')
+
+    else:
+        album_form = AlbumModelForm()
+        detalle_album_form = DetalleAlbumModelForm()
+        cancion_formset = CancionFormSet(prefix='canciones')
+        detalles_cancion_formset = DetallesCancionFormSet(prefix='detalles')
+
+    context = {
+        'album_form': album_form,
+        'detalle_album_form': detalle_album_form,
+        'cancion_formset': cancion_formset,
+        'detalles_cancion_formset': detalles_cancion_formset,
+        'title': 'Crear Nuevo Álbum'
        
+    }
+    return render(request, 'CRUD_album/crear_album_canciones.html', context)
+
+
+### CRUD Comentario
+@login_required
+def crear_comentario(request, album_id):
+
+    album = Album.objects.get(id=album_id)
+
+    if request.method == 'POST':
+        form = ComentarioModelForm(request.POST)
+
+        if form.is_valid():
+            comentario = form.save(commit=False)
+            comentario.usuario = request.user
+            comentario.album = album
+            comentario.save()
+            messages.success(request, 'Tu comentario se ha publicado con éxito')
+            return redirect('comentarios_album', album_id=album.id)
+        else:
+            messages.error(request, 'Hubo un error al publicar tu comentario. Por favor, verifica los datos e inténtalo de nuevo.')
+            return redirect('comentarios_album', album_id=album.id)
+
+    else:
+        form = ComentarioModelForm()
+
+    # Obtenemos los comentarios existentes para mostrar en la página
+    comentarios = Comentario.objects.filter(album=album).order_by('-fecha_publicacion')
+    
+    context = {
+        'form': form,
+        'album': album,
+        'comentarios': comentarios
+    }
+    
+    return render(request, 'CRUD_comentario/crear_comentario.html', context)
+
+
+@login_required
+def actualizar_comentario(request, album_id, comentario_id):
+    album = Album.objects.get(id=album_id)
+
+    comentario = Comentario.objects.get(id=comentario_id, usuario=request.user)
+
+    if request.method == 'POST':
+        form = ComentarioModelForm(request.POST, instance=comentario)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Comentario actualizado')
+            return redirect('comentarios_album', album_id=album.id)
+    else:
+        form = ComentarioModelForm(instance=comentario)
+
+    context = {
+        'form': form,
+        'album': album,
+        'comentario': comentario,
+        'is_update': True
+    }
+
+    return render(request, 'CRUD_comentario/editar_comentario.html', context)
     
 
+def busqueda_avanzada_comentarios(request, album_id):
+    album = Album.objects.get(id=album_id)
+    form_busqueda = BusquedaAvanzadaComentarioForm(request.GET or None)
+    
+    comentarios = Comentario.objects.filter(album=album).select_related('usuario')
+    
+    if form_busqueda.is_valid():
+        contenido = form_busqueda.cleaned_data.get('contenido')
+        usuario = form_busqueda.cleaned_data.get('usuario')
+        fecha_desde = form_busqueda.cleaned_data.get('fecha_desde')
+        fecha_hasta = form_busqueda.cleaned_data.get('fecha_hasta')
+        
+        if contenido:
+            comentarios = comentarios.filter(contenido__icontains=contenido)
+        
+        if usuario:
+            comentarios = comentarios.filter(usuario__nombre_usuario__icontains=usuario)
+        
+        if fecha_desde:
+            comentarios = comentarios.filter(fecha_publicacion__date__gte=fecha_desde)
+        
+        if fecha_hasta:
+            comentarios = comentarios.filter(fecha_publicacion__date__lte=fecha_hasta)
+    
+    comentarios = comentarios.order_by('-fecha_publicacion')
+    
+    context = {
+        'album': album,
+        'comentarios': comentarios,
+        'form_busqueda': form_busqueda
+    }
+    
+    if request.headers.get('HX-Request'):
+        return render(request, 'comentarios/includes/lista_comentarios.html', context)
+    
+    return render(request, 'comentarios/includes/busqueda_avanzada.html', context)
 
 
-
-
+@login_required
+def eliminar_comentario(request, album_id, comentario_id):
+    comentario = Comentario.objects.get(id=comentario_id, album_id=album_id)
+    if request.user == comentario.usuario:
+        comentario.delete()
+    return redirect('comentarios_album', album_id=album_id)
 
 
 
@@ -373,23 +530,19 @@ def perfil_usuario(request, nombre_usuario):
                   })
 
 
-# 3. Feed que muestra los álbumes subidos por los usuarios seguidos
-def feed(request, nombre_usuario):
-    # Primero obtenemos el usuario actual y los usuarios que sigue
-    usuario_actual = Usuario.objects.get(nombre_usuario=nombre_usuario)
-    usuarios_seguidos = usuario_actual.obtener_seguidos()
 
-    # Ahora los álbumes de los usuarios seguidos, ordenados por fecha de subida
-    albumes_feed = Album.objects.select_related('usuario').filter(usuario__in=usuarios_seguidos).order_by('-fecha_subida')[:5] #uso de limit
+@login_required
+def feed(request):
+      # Obtener los usuarios que sigue el usuario actual
+    usuarios_seguidos = request.user.obtener_seguidos()
+    
+    # Obtener los álbumes solo de los usuarios seguidos
+    albums = Album.objects.filter(
+        usuario__in=usuarios_seguidos
+    ).select_related('usuario', 'detalle_album').order_by('-fecha_subida')
 
-    # Calculamos el total de likes en los álbumes del feed
-    total_likes = albumes_feed.aggregate(total_likes=Sum('estadisticasalbum__likes'))['total_likes'] or 0
-
-    # Renderizammos el feed con los álbumes y el total de likes
-    return render(request, 'usuario/feed.html', {
-        'albumes_feed': albumes_feed,
-        'usuario_actual': usuario_actual,
-        'total_likes': total_likes,
+    return render(request, "usuario/feed.html", {
+        'albums': albums
     })
 
 
@@ -431,19 +584,40 @@ def canciones_album(request, album_id):
 
 # 7. Comentarios de un álbum específico
 def comentarios_album(request, album_id):
-    # Obtenemos el álbum y sus comentarios, ordenados por fecha de publicación (uso de prefetch y queryset)
-    album = Album.objects.prefetch_related(
-        Prefetch(
-            'comentario_set',
-            queryset=Comentario.objects.select_related('usuario').order_by('-fecha_publicacion'),
-            to_attr='comentarios'
-        )
-    ).get(id=album_id)
+    album = Album.objects.get(id=album_id)
+    
+    # Inicializamos el formulario con los datos de GET si existen
+    form_busqueda = BusquedaAvanzadaComentarioForm(request.GET or None)
+    
+    # Obtenemos los comentarios base
+    comentarios = Comentario.objects.filter(album=album).select_related('usuario')
+    
+    # Si el formulario se envía y es válido, aplicamos los filtros
+    if form_busqueda.is_valid():
+        contenido = form_busqueda.cleaned_data.get('contenido')
+        usuario = form_busqueda.cleaned_data.get('usuario')
+        fecha_desde = form_busqueda.cleaned_data.get('fecha_desde')
+        fecha_hasta = form_busqueda.cleaned_data.get('fecha_hasta')
+        
+        if contenido:
+            comentarios = comentarios.filter(contenido__icontains=contenido)
+        
+        if usuario:
+            comentarios = comentarios.filter(usuario__nombre_usuario__icontains=usuario)
+        
+        if fecha_desde:
+            comentarios = comentarios.filter(fecha_publicacion__date__gte=fecha_desde)
+        
+        if fecha_hasta:
+            comentarios = comentarios.filter(fecha_publicacion__date__lte=fecha_hasta)
+    
+    comentarios = comentarios.order_by('-fecha_publicacion')
 
-    # Renderizamos la plantilla con los comentarios del álbum
     return render(request, 'album/comentarios_album.html', {
         'album': album,
-        'comentarios': album.comentarios
+        'comentarios': comentarios,
+        'form_busqueda': form_busqueda,
+        'form': ComentarioModelForm()  # Añadimos el formulario de crear comentario
     })
 
 
@@ -544,6 +718,11 @@ def lista_no_sigue(request, nombre_usuario):
         'usuarios_no_seguidos': usuarios_no_seguidos
     })
 
+
+def lista_seguidos(request):
+    usuario_actual = request.user
+    usuarios_seguidos = usuario_actual.obtener_seguidos()
+    return render(request, 'usuario/usuarios_seguidos.html', {'usuarios_seguidos': usuarios_seguidos})
 
 #Vistas de error
 def mi_error_400(request,exception=None):

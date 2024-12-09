@@ -1,0 +1,22 @@
+{% extends 'principal.html' %}
+
+
+
+{% block contenido %}
+
+<h2>Usuarios que sigues</h2>
+<div class="row">
+    {% for usuario in usuarios_seguidos %}
+        {% if usuario != request.user %}
+            {% include 'usuario/tarjeta_usuarios.html' %}
+        {% endif %}
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning">
+                No se encontraron usuarios que coincidan con los criterios de búsqueda.
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

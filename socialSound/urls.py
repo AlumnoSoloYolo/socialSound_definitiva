@@ -10,22 +10,26 @@ urlpatterns = [
      path('usuarios/busqueda-avanzada/', views.busqueda_avanzada_usuarios, name='busqueda_avanzada_usuarios'),
      path('seguir/<int:usuario_id>/', views.seguir_usuario, name='seguir_usuario'),
      path('dejar-de-seguir/<int:usuario_id>/', views.dejar_de_seguir_usuario, name='dejar_de_seguir_usuario'),
-     path('perfil/<str:nombre_usuario>/album/crear/', views.crear_album, name='crear_album'),
+     # path('perfil/<str:nombre_usuario>/album/crear/', views.crear_album, name='crear_album'),
      path('perfil/<str:nombre_usuario>/album/<int:album_id>/editar/', views.editar_album, name='editar_album'),
      path('album/busqueda-avanzada/', views.busqueda_avanzada_album, name='busqueda_avanzada_albumes'),
      path('album/<int:album_id>/eliminar/', views.eliminar_album, name='eliminar_album'),
+     path('album/<int:album_id>/comentar/', views.crear_comentario, name='crear_comentario'),
+     path('album/<int:album_id>/comentario/<int:comentario_id>/editar/', views.actualizar_comentario, name='editar_comentario'),
+     path('album/<int:album_id>/comentarios/buscar/',  views.busqueda_avanzada_comentarios,  name='busqueda_avanzada_comentarios'),
+     path('album/<int:album_id>/comentario/<int:comentario_id>/eliminar/', views.eliminar_comentario, name='eliminar_comentario'),
+      path('perfil/<str:nombre_usuario>/album/crear/', views.crear_album_con_canciones, name='crear_album'),
 
 
 
 
 
 
-
-
+      path('usuarios-seguidos/', views.lista_seguidos, name='usuarios_seguidos'),
      path('', views.index, name='index'),  # Página de inicio con enlaces a todas las URLs
      path('mensajes_privados/<int:emisor_id>/<int:receptor_id>/', views.mensajes_privados, name='mensajes_privados'),
      re_path(r'^perfil_usuario/(?P<nombre_usuario>[a-zA-Z0-9_]+)/$', views.perfil_usuario, name='perfil_usuario'),
-     path('usuario/<str:nombre_usuario>/feed/', views.feed, name='feed'),
+     path('usuario/feed/', views.feed, name='feed'),
      path('cancion/<int:cancion_id>/detalles_cancion/', views.detalle_cancion, name='detalle_cancion'),
      path('album/<int:album_id>/detalles_album/', views.detalle_album, name='detalle_album'),
      path('album/<int:album_id>/canciones/', views.canciones_album, name='canciones_album'),

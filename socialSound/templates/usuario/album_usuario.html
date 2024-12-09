@@ -1,7 +1,7 @@
-{% load static %}
+{% load static%}
+
 <div class="col-md-4 mb-4">
-    <div class="card h-100 border-0 shadow-sm hover-shadow-lg transition-all">
-        <!-- Contenedor de imagen con ratio fijo -->
+    <div class="card h-100 bg-dark text-white border-0 shadow-lg">
         <div class="position-relative" style="padding-bottom: 100%;">
             {% if album.portada %}
                 <img src="{{ album.portada.url }}" 
@@ -16,42 +16,38 @@
             {% endif %}
         </div>
         
-        <div class="card-body p-4">
-            <h5 class="card-title fw-bold mb-3">{{ album.titulo }}</h5>
-            <p class="card-text mb-2"><strong>Artista:</strong> {{ album.artista|upper }}</p>
+        <div class="card-body p-4 bg-dark bg-opacity-75">
+            <h5 class="card-title text-warning fw-bold mb-3">{{ album.titulo }}</h5>
+            <p class="card-text text-light mb-2"><strong>Artista:</strong> {{ album.artista|upper }}</p>
             {% if album.descripcion %}
-                <p class="card-text text-muted small mb-3">{{ album.descripcion|lower }}</p>
+                <p class="card-text text-light-50 small mb-3">{{ album.descripcion|lower }}</p>
             {% endif %}
-            <p class="card-text small text-muted mb-3">
+            <p class="card-text text-light-50 small mb-3">
                 <i class="bi bi-calendar"></i> {{ album.fecha_subida|date:"d/m/Y"}}
             </p>
-
-            <!-- Botones principales -->
+ 
             <div class="d-grid gap-2">
                 <a href="{% url 'detalle_album' album.id %}" class="btn btn-warning">
                     <i class="bi bi-info-circle me-1"></i> Ver detalles
                 </a>
                 
-                <!-- Grupo de botones secundarios -->
                 <div class="btn-group w-100">
-                    <a href="{% url 'canciones_album' album.id %}" class="btn btn-outline-secondary flex-grow-1">
+                    <a href="{% url 'canciones_album' album.id %}" class="btn btn-outline-light flex-grow-1">
                         <i class="bi bi-music-note-list me-1"></i> Canciones
                     </a>
-                    <a href="{% url 'comentarios_album' album.id %}" class="btn btn-outline-secondary flex-grow-1">
+                    <a href="{% url 'comentarios_album' album.id %}" class="btn btn-outline-light flex-grow-1">
                         <i class="bi bi-chat me-1"></i> Comentarios
                     </a>
                 </div>
-
-                <!-- Opciones de edición para el propietario -->
+ 
                 {% if request.user == usuario %}
                     <div class="dropdown mt-2">
-                        <button class="btn btn-outline-secondary w-100 dropdown-toggle" 
+                        <button class="btn btn-outline-light w-100 dropdown-toggle" 
                                 type="button" 
-                                data-bs-toggle="dropdown" 
-                                aria-expanded="false">
+                                data-bs-toggle="dropdown">
                             <i class="fa-solid fa-gear me-1"></i> Opciones
                         </button>
-                        <ul class="dropdown-menu w-100">
+                        <ul class="dropdown-menu dropdown-menu-dark w-100">
                             <li>
                                 <a class="dropdown-item" href="{% url 'editar_album' request.user.nombre_usuario album.id %}">
                                     <i class="fa-solid fa-wrench me-2"></i> Editar Álbum
@@ -65,7 +61,7 @@
                                         {% csrf_token %}
                                         <button type="submit" 
                                                 class="dropdown-item text-danger"
-                                                onclick="return confirm('¿Estás seguro de que quieres eliminar el álbum {{ album.titulo }}? Esta acción eliminará también todas las canciones asociadas y no se puede deshacer.');">
+                                                onclick="return confirm('¿Estás seguro?');">
                                             <i class="fa-solid fa-trash me-2"></i> Eliminar
                                         </button>
                                     </form>
@@ -77,4 +73,4 @@
             </div>
         </div>
     </div>
-</div>
+ </div>

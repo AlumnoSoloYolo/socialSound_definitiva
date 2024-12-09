@@ -1,8 +1,77 @@
 {% extends 'principal.html' %}
 {% load static %}
+{% block extra_css %}
+<style>
+
+    .container{
+        z-index: 2;
+        position:relative;
+    }
+
+    .container-busqueda {
+        min-height: calc(100vh - 60px);
+        background: #0a0a0a;
+        position: relative;
+        margin-top: -24px; /* Elimina el espacio blanco */
+        padding-top: 20px;
+      }
+
+.stars {
+    position: fixed;
+    top: 60px; /* Ajusta este valor a la altura de tu header */
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 60px); /* Ajusta para que no cubra el header */
+    pointer-events: none;
+ }
+
+.stars::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
+        radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
+        radial-gradient(2px 2px at 50px 160px, #ffffff, transparent),
+        radial-gradient(2px 2px at 90px 40px, #ffffff, transparent),
+        radial-gradient(2px 2px at 130px 80px, #ffffff, transparent),
+        radial-gradient(2px 2px at 160px 120px, #ffffff, transparent);
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: twinkle 5s linear infinite;
+
+}
+
+@keyframes twinkle {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-200px); }
+}
+</style>
+{% endblock %}
 
 {% block contenido %}
+<div class="container-busqueda">
+
+    {% if messages %}
+    {% for message in messages %}
+        {% if message.tags == "success" %}
+            <div class="alert alert-success mt-6 alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+       
 <div class="container py-5">
+    <div class="stars"></div>
     <!-- Cabecera del perfil -->
     <div class="card border-0 shadow-lg bg-dark text-white mb-5">
         <div class="card-body p-4">
@@ -24,6 +93,12 @@
 
                 <!-- Columna de información -->
                 <div class="col-lg-9">
+                    {% if 'login' in message.tags %}
+                                    <div class="alert alert-success alert-{{ message.tags }} success-message mb-4">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        {{ message }}
+                                    </div>
+                                {% endif %}
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2 class="mb-0">{{ usuario.nombre_usuario }}</h2>
                         {% if request.user == usuario %}
@@ -52,18 +127,28 @@
                     </div>
 
                     <!-- Estadísticas en tarjetas modernas -->
-                    <div class="d-flex gap-4 mb-4">
-                        <div class="stat-card bg-warning bg-opacity-10 p-3 rounded text-center" style="min-width: 120px">
-                            <h3 class="mb-1">{{ total_albumes }}</h3>
-                            <span class="text-warning">Publicaciones</span>
+                    <div class="row text-center mb-4">
+                        <div class="col-12 col-sm-4">
+                            <div class="stat-card bg-warning bg-opacity-10 p-3 rounded">
+                                <h3 class="mb-1">{{ total_albumes }}</h3>
+                                <span class="text-warning">Publicaciones</span>
+                            </div>
                         </div>
-                        <div class="stat-card bg-warning bg-opacity-10 p-3 rounded text-center" style="min-width: 120px">
-                            <h3 class="mb-1">{{ total_seguidores }}</h3>
-                            <span class="text-warning">Seguidores</span>
+                        <div class="col-12 col-sm-4">
+                            <a href="#" class="text-decoration-none" style="color: inherit">
+                                <div class="stat-card bg-warning bg-opacity-10 p-3 rounded">
+                                    <h3 class="mb-1">{{ total_seguidores }}</h3>
+                                    <span class="text-warning">Seguidores</span>
+                                </div>
+                            </a>
                         </div>
-                        <div class="stat-card bg-warning bg-opacity-10 p-3 rounded text-center" style="min-width: 120px">
-                            <h3 class="mb-1">{{ total_seguidos }}</h3>
-                            <span class="text-warning">Seguidos</span>
+                        <div class="col-12 col-sm-4">
+                            <a href="{% url 'usuarios_seguidos' %}" class="text-decoration-none" style="color: inherit">
+                                <div class="stat-card bg-warning bg-opacity-10 p-3 rounded">
+                                    <h3 class="mb-1">{{ total_seguidos }}</h3>
+                                    <span class="text-warning">Seguidos</span>
+                                </div>
+                            </a>
                         </div>
                     </div>
 
@@ -96,7 +181,7 @@
     <!-- Sección de álbumes -->
     <div class="albums-section">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="mb-0">Álbumes</h3>
+            <h3 class="mb-0 text-warning">Álbumes</h3>
             {% if user == usuario %}
                 <a href="{% url 'crear_album' usuario.nombre_usuario %}" class="btn btn-warning">
                     <i class="fa-solid fa-plus me-2"></i>Nuevo álbum
@@ -117,5 +202,7 @@
             {% endfor %}
         </div>
     </div>
+</div>
+</div>
 </div>
 {% endblock %}

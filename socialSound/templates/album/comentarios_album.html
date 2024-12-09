@@ -1,42 +1,132 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'principal.html' %}
 
-<head>
-    {% extends 'principal.html' %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comentarios en {{ album.titulo }}</title>
-</head>
+{% block contenido %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-decoration-none">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Comentarios</li>
+        </ol>
+    </nav>
 
-<body>
-    {% block contenido %}
-    <div class="album-comment">
-        <a href="{% url 'index' %}">Volver al inicio</a>
-        <h1>Comentarios en: {{ album.titulo|default:"Título no disponible" }}</h1>
+    <div class="row">
+        <!-- Columna del álbum -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                {% if album.portada %}
+                    <img src="{{ album.portada.url }}" class="card-img-top" alt="{{ album.titulo }}">
+                {% else %}
+                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 300px;">
+                        <i class="fas fa-music fa-3x"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ album.titulo|default:"Título no disponible" }}</h5>
+                    {% if album.usuario and album.usuario.nombre_usuario %}
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <a href="{% url 'perfil_usuario' album.usuario.nombre_usuario %}" class="text-decoration-none">
+                                {{ album.usuario.nombre_usuario }}
+                            </a>
+                        </h6>
+                    {% endif %}
+                    <p class="card-text small">{{ album.descripcion|linebreaks|default:"No hay descripción disponible." }}</p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="far fa-calendar-alt"></i> 
+                            {{ album.fecha_subida|date:"d/m/Y" }}
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
 
-        {% if album.usuario and album.usuario.nombre_usuario %}
-        <a href="{% url 'perfil_usuario' album.usuario.nombre_usuario %}">
-            <p>Publicado por: {{ album.usuario.nombre_usuario|default:"Usuario desconocido" }}</p>
-        </a>
+        <!-- Columna de comentarios -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Comentarios</h5>
+                </div>
+                
+                {# Aquí incluimos el formulario de búsqueda #}
+                {% include "CRUD_comentario/busqueda_avanzada.html" %}
+                
+                <div class="card-body">
+                    {# Aquí incluimos la lista de comentarios #}
+                    {% include "CRUD_comentario/lista_comentarios.html" %}
+
+                    <!-- Formulario de nuevo comentario -->
+                    <div class="mt-4">
+                        <h6 class="mb-3">Añadir un comentario</h6>
+                        <form method="post" action="{% url 'crear_comentario' album.id %}">
+                            {% csrf_token %}
+                            
+                            {% if messages %}
+    {% for message in messages %}
+        {% if message.tags == "success" %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+            </div>
+        {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ message }}
+            </div>
         {% else %}
-        <p>Publicado por: Usuario no especificado</p>
+            <div class="alert bg-secondary alert-dismissible fade show" role="alert">
+                {{ message }}
+            </div>
         {% endif %}
-
-        <p>Descripción: {{ album.descripcion|linebreaks|default:"No hay descripción disponible." }}</p>
-        <p>Fecha de subida: {{ album.fecha_subida|date:"d/m/Y" }}</p>
-
-        <h2>Comentarios:</h2>
-        <ul>
-            {% if comentarios|length > 0 %}
-            {% for comentario in comentarios %}
-            {% include 'album/comentario.html' %}
-            {% endfor %}
-            {% else %}
-            <li>No hay comentarios para este álbum.</li>
-            {% endif %}
-        </ul>
+    {% endfor %}
+{% endif %}
+                            
+                            <div class="form-group">
+                                {{ form.contenido }}
+                                {% if form.contenido.errors %}
+                                    {% for error in form.contenido.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary mt-3">
+                                <i class="fas fa-paper-plane me-1"></i> Publicar comentario
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endblock %}
-</body>
+</div>
 
-</html>
+<style>
+    .comment-card {
+        transition: background-color 0.2s ease;
+    }
+    
+    .comment-card:hover {
+        background-color: #f8f9fa;
+    }
+
+    .btn-link {
+        transition: opacity 0.2s ease;
+    }
+
+    .btn-link:hover {
+        opacity: 0.7;
+    }
+
+    .form-control {
+        border-radius: 0.5rem;
+    }
+
+    .card {
+        border-radius: 1rem;
+        border: none;
+    }
+
+    .card-header {
+        border-top-left-radius: 1rem !important;
+        border-top-right-radius: 1rem !important;
+    }
+</style>
+{% endblock %}

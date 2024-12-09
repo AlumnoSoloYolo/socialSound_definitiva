@@ -1,116 +1,231 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Canciones</title>
-    <style>
-        .canciones-fondo {
-            display: flex;
-            justify-content: center;
-            background-image: url('/static/images/punk-png.webp');
-            background-size: center;
-            background-repeat: no-repeat;
-            height: auto;
-        }
-
-        .canciones-album {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: auto;
-            padding: 20px;
-            margin-top: 50px;
-            width: 1000px;
-            background-color: rgb(205, 205, 205, 0.5);
-            box-shadow: -10px 0 15px rgba(0, 0, 0, 0.3), 10px 0 15px rgba(0, 0, 0, 0.3);
-
-        }
-
-
-        .canciones-album h1 {
-            color: #333;
-        }
-
-        .canciones-album h2 {
-            color: #666;
-            margin-top: 20px;
-        }
-
-        .canciones-album img {
-            display: block;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            max-width: 460px;
-            max-height: 460px;
-            box-shadow: -10px 0 15px rgba(0, 0, 0, 0.3), 10px 0 15px rgba(0, 0, 0, 0.3);
-
-        }
-
-        .canciones-album ul {
-            display: flex;
-            flex-direction: column;
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .canciones-album li {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 10px 0;
-            width: 460px;
-        }
-
-        .canciones-album a {
-            text-decoration: none;
-            color: #007BFF;
-        }
-
-        .canciones-album a:hover {
-            text-decoration: underline;
-        }
-
-
-        .canciones-album .lista-canciones>li {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-    </style>
-</head>
-
 {% extends 'principal.html' %}
+{% load static %}
 
-<body>
+{% block extra_css %}
+<style>
+    .container-canciones {
+        min-height: calc(100vh - 60px);
+        background: #0a0a0a;
+        position: relative;
+        margin-top: -24px;
+        padding-top: 20px;
+    }
 
-    {% block contenido %}
-    <div class="canciones-fondo">
-        <div class="canciones-album">
-            <a href="{% url 'index' %}">volver al inicio</a>
+    .stars {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 60px);
+        pointer-events: none;
+    }
 
-            <h1>Canciones de {{ album.titulo }}</h1>
-            <img src="{{ album.portada.url }}" alt="Portada de {{ cancion.titulo }}">
+    .stars::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
+            radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
+            radial-gradient(2px 2px at 50px 160px, #ffffff, transparent),
+            radial-gradient(2px 2px at 90px 40px, #ffffff, transparent),
+            radial-gradient(2px 2px at 130px 80px, #ffffff, transparent),
+            radial-gradient(2px 2px at 160px 120px, #ffffff, transparent);
+        background-repeat: repeat;
+        background-size: 200px 200px;
+        animation: twinkle 5s linear infinite;
+    }
 
-            <ul class="lista-canciones">
-                {% for cancion in album.canciones.all %}
-                {% include 'cancion/cancion.html' %}
-                {% empty %}
-                <li>No hay canciones disponibles en este álbum.</li>
-                {% endfor %}
-            </ul>
+    @keyframes twinkle {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-200px); }
+    }
 
-            <a href="{% url 'perfil_usuario' album.usuario.nombre_usuario %}">Volver al perfil</a>
+    audio::-webkit-media-controls-panel {
+        background-color: #212529;
+    }
 
+    .custom-audio-player {
+        background: #1a1a1a;
+        border: 1px solid white;
+        border-radius: 30px;
+        padding: 5px 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 100%;
+    }
+    
+    /* Contenedor principal del audio */
+    audio::-webkit-media-controls-panel {
+        background: #1a1a1a !important;
+        border-radius: 20px;
+    }
+    
+    /* Botón de play */
+    audio::-webkit-media-controls-play-button {
+        background-color: #ffc107;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+    
+    /* Barra de progreso */
+    audio::-webkit-media-controls-timeline {
+        background-color: #333;
+        border-radius: 10px;
+        height: 3px;
+        margin: 0 10px;
+    }
+    
+    /* Tiempo actual y restante */
+    audio::-webkit-media-controls-current-time-display,
+    audio::-webkit-media-controls-time-remaining-display {
+        color: #ffc107;
+        font-family: monospace;
+        font-size: 12px;
+    }
+    
+    /* Botón de volumen */
+    audio::-webkit-media-controls-mute-button {
+        background-color: #ffc107;
+        border-radius: 50%;
+    }
+    
+    /* Barra de volumen */
+    audio::-webkit-media-controls-volume-slider {
+        background-color: #333;
+        border-radius: 10px;
+        height: 3px;
+    }
+    
+    /* Actualización del layout de la canción */
+    .song-item {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: center;
+        padding: 10px 15px;
+    }
+    
+    .song-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .audio-controls {
+        flex: 0 0 auto;
+    }
+    
+    .btn-details {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    @media (max-width: 576px) {
+        .song-item {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .song-info {
+          margin-bottom: 10px;
+        }
+        
+        .audio-controls {
+          width: 100%;
+        }
+        
+        .custom-audio-player {
+          margin-bottom: 10px;
+        }
+        .audio-controls {
+            display: flex;
+            align-items: center;
+          }
+          
+          .btn-details {
+            margin-right: 10px;
+          }
+      }
+    
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="container-canciones">
+    <div class="stars"></div>
+    <div class="container py-5">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-warning"><i class="fas fa-home"></i> Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'perfil_usuario' album.usuario.nombre_usuario %}" class="text-warning">{{ album.usuario.nombre_usuario }}</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">{{ album.titulo }}</li>
+            </ol>
+        </nav>
+
+        <div class="card border-0 shadow-lg bg-dark text-white mb-5">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-3 text-center">
+                        {% if album.portada %}
+                            <img src="{{ album.portada.url }}" 
+                                 alt="Portada de {{ album.titulo }}"
+                                 class="img-fluid rounded"
+                                 style="max-width: 250px; border: 3px solid #ffc107;">
+                        {% endif %}
+                    </div>
+                    <div class="col-lg-9">
+                        <h2 class="mb-3">{{ album.titulo }}</h2>
+                        <p class="text-warning mb-2">
+                            <i class="fas fa-user me-2"></i>{{ album.artista }}
+                        </p>
+                        <p class="text-muted">
+                            <i class="fas fa-calendar me-2"></i>{{ album.fecha_subida|date:"d/m/Y" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="songs-section">
+            <h3 class="text-warning mb-4"><i class="fas fa-music me-2"></i>Canciones</h3>
+            
+            {% if album.canciones.all %}
+                <div class="list-group">
+                    {% for cancion in album.canciones.all %}
+                    <div class="list-group-item bg-dark text-white mb-2">
+                        <div class="song-item">
+                          <div class="song-info">
+                            <span class="text-warning">{{ forloop.counter }}</span>
+                            <div>
+                              <h5 class="mb-0">{{ cancion.titulo }}</h5>
+                              <small class="text-white">{{ cancion.artista }}</small>
+                            </div>
+                          </div>
+                          <a href="{% url 'detalle_cancion' cancion.id %}" class="btn btn-warning btn-details">
+                            <i class="fas fa-info-circle"></i>
+                          </a>
+                          <div class="audio-controls">
+                           
+                            <div class="custom-audio-player">
+                              <audio controls class="custom-audio">
+                                <source src="{{ cancion.archivo_audio.url }}" type="audio/mpeg">
+                              </audio>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    No hay canciones disponibles en este álbum.
+                </div>
+            {% endif %}
         </div>
     </div>
-
-    {% endblock %}
-</body>
-
-</html>
+</div>
+{% endblock %}

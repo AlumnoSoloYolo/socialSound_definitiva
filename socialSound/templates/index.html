@@ -1,41 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Inicio</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: whitesmoke;
-        }
-
-        .container-index {
-            background-image: url('/static/images/punk-png.webp');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            height: 100vh;
-        }
-
-        .container-index h1 {
-            color: #333;
-        }
-    </style>
-</head>
-
 {% extends 'principal.html' %}
 
-<body>
+{% block custom_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-    {% block contenido %}
-    <div class="container-index">
-        <h1>Bienvenido</h1>
+    *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body, html {
+        overflow-x: hidden;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container-index {
+        position: absolute;
+        min-height: calc(100vh - 60px);
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        background: #0a0a0a;
+        position: relative;
+    }
+
+    .stars {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .stars::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
+            radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
+            radial-gradient(2px 2px at 50px 160px, #ffffff, transparent),
+            radial-gradient(2px 2px at 90px 40px, #ffffff, transparent),
+            radial-gradient(2px 2px at 130px 80px, #ffffff, transparent),
+            radial-gradient(2px 2px at 160px 120px, #ffffff, transparent);
+        background-repeat: repeat;
+        background-size: 200px 200px;
+        animation: twinkle 6s linear infinite;
+    }
+
+    @keyframes twinkle {
+        0% { transform: translateY(0); opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { transform: translateY(-200px); opacity: 1; }
+    }
+
+    .welcome-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 7rem;
+        font-weight: 800;
+        background: linear-gradient(
+            to right, 
+            #4facfe 0%, 
+            #00f2fe 30%, 
+            #a6ffcb 70%, 
+            #12fff7 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        position: relative;
+        animation: cometEffect 1.2s ease-out forwards;
+        text-shadow: 
+            0 0 10px rgba(18, 255, 247, 0.5),
+            0 0 20px rgba(18, 255, 247, 0.3),
+            0 0 30px rgba(18, 255, 247, 0.2);
+        letter-spacing: 4px;
+        z-index: 1;
+        text-align: center;
+    }
+
+    @keyframes cometEffect {
+        0% {
+            transform: translateY(-100vh) scale(0.2);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+    
+    .welcome-title {
+        animation: cometEffect 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .slogan {
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: #fff;
+        text-align: center;
+        margin-top: 10px;
+        opacity: 0;
+        animation: fadeInUp 1s ease-out 1s forwards;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px); 
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .welcome-title {
+            font-size: 4rem;
+        }
+        .slogan {
+            font-size: 1.2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .welcome-title {
+            font-size: 3rem;
+        }
+        .slogan {
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="container-index">
+    <div class="stars"></div>
+    <div class="text-center">
+        <h1 class="welcome-title">Bienvenido a Cometa</h1>
+        <h3 class="slogan">Tu música por todo el universo</h3>
     </div>
-
-    {% endblock %}
-
-
-</body>
-
-</html>
+</div>
+{% endblock %}

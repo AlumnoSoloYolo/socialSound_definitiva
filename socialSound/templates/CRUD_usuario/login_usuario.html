@@ -6,58 +6,65 @@
 {% endblock %}
 
 {% block contenido %}
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="login-card">
-                    <div class="login-header">
-                        <h2 class="text-center">Bienvenido</h2>
-                    </div>
-                    
-                    <div class="card-body p-4">
-                        {% if messages %}
-                            {% for message in messages %}
-                                {% if 'registro' in message.tags %}
-                                    <div class="alert alert-success alert-{{ message.tags }} success-message mb-4">
-                                        <i class="fas fa-check-circle me-2"></i>
-                                        {{ message }}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
+<div class="container-index">
+    <div class="stars"></div>
+    <div class="text-center">
+        <div class="login-card">
+            <div class="login-header">
+                <h2 class="text-center">Bienvenido</h2>
+            </div>
 
-                        <form method="POST" action="{% url 'login_usuario' %}">
-                            {% csrf_token %}
-                            {% for field in form %}
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">{{ field.label }}</label>
-                                    {{ field }}
-                                    {% if field.errors %}
-                                        <div class="text-danger mt-2 small">
-                                            {% for error in field.errors %}
-                                                <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+            <div class="card-body p-4">
+                <!-- Mensajes generales -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} mb-4" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>{{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Mensajes de error generales del formulario -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                            <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'login_usuario' %}">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">{{ field.label }}</label>
+                            {{ field }}
+
+                            <!-- Mostrar errores específicos del campo -->
+                            {% if field.errors %}
+                                <div class="text-danger mt-2 small">
+                                    {% for error in field.errors %}
+                                        <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                                    {% endfor %}
                                 </div>
-                            {% endfor %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
 
-                            <button type="submit" class="btn btn-login bron-warning w-100 mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
-                            </button>
+                    <!-- Botón para iniciar sesión -->
+                    <button type="submit" class="btn btn-login btn-warning w-100 mb-3">
+                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                    </button>
 
-                            <div class="text-center mt-4">
-                                <p class="mb-0">¿Aún no tienes cuenta? 
-                                    <a href="{% url 'registro_usuario' %}" class="register-link">
-                                        Regístrate aquí
-                                    </a>
-                                </p>
-                            </div>
-                        </form>
+                    <!-- Enlace para registrarse -->
+                    <div class="text-center mt-4">
+                        <p class="mb-0">¿Aún no tienes cuenta? 
+                            <a href="{% url 'registro_usuario' %}" class="register-link">Regístrate aquí</a>
+                        </p>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
-
+</div>
 {% endblock %}

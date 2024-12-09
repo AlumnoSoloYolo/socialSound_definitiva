@@ -14,8 +14,13 @@
     {% bootstrap_css %}
     {% load bootstrap_icons %}
 
+    {% block extra_script %}
+    {% endblock %}
+
     {% block extra_css %}
     {% endblock %}
+
+   
 
 </head>
 
@@ -24,12 +29,12 @@
         {% include 'header.html' %}
     </header>
     <main>
-        <div class="container">
+        
 
         {% block contenido %}
 
         {% endblock %}
-        </div>
+       
     </main>
     <footer>
         {% include 'footer.html' %}

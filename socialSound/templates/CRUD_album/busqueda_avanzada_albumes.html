@@ -102,6 +102,17 @@
                             <div class="mt-3">
                                 <a href="{% url 'canciones_album' album.id %}" class="btn btn-warning">Ver canciones</a>
                             </div>
+                            <!--comentarios-->
+                            <div class="mt-3">
+                                <div class="btn-group">
+                                    <a href="{% url 'canciones_album' album.id %}" class="btn btn-warning">
+                                        <i class="bi bi-music-note-list"></i> Ver canciones
+                                    </a>
+                                    <a href="{% url 'comentarios_album' album.id %}" class="btn btn-warning">
+                                        <i class="bi bi-chat"></i> Ver comentarios
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

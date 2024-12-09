@@ -1,17 +1,66 @@
 {% extends 'principal.html' %}
 
+{% block extra_css %}
+<style>
+    .container-busqueda {
+        min-height: calc(100vh - 60px);
+        background: #0a0a0a;
+        position: relative;
+        margin-top: -24px; /* Elimina el espacio blanco */
+        padding-top: 22px;
+        
+      }
+
+.stars {
+    position: fixed;
+    top: 60px; /* Ajusta este valor a la altura de tu header */
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 60px); /* Ajusta para que no cubra el header */
+    pointer-events: none;
+ }
+
+
+
+.stars::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
+        radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
+        radial-gradient(2px 2px at 50px 160px, #ffffff, transparent),
+        radial-gradient(2px 2px at 90px 40px, #ffffff, transparent),
+        radial-gradient(2px 2px at 130px 80px, #ffffff, transparent),
+        radial-gradient(2px 2px at 160px 120px, #ffffff, transparent);
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: twinkle 5s linear infinite;
+
+}
+
+@keyframes twinkle {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-200px); }
+}
+</style>
+{% endblock %}
+
 {% block contenido %}
+<div class="container-busqueda">
 <div class="container mt-4">
-    <h2 class="mb-4">Búsqueda Avanzada de Usuarios</h2>
+    <div class="stars"></div>
+    <h2 class="mb-4 text-warning">Búsqueda Avanzada de Usuarios</h2>
 
     <!-- Formulario de búsqueda -->
-    <div class="card mb-4">
+    <div class="card bg-dark mb-4">
         <div class="card-body">
             <form method="GET" class="row g-3">
                 {% csrf_token %}
                 
                 <div class="col-md-6">
-                    <label for="{{ form.nombre_usuario.id_for_label }}" class="form-label">Nombre de usuario</label>
+                    <label for="{{ form.nombre_usuario.id_for_label }}" class="form-label text-white">Nombre de usuario</label>
                     <input type="text" 
                            name="{{ form.nombre_usuario.html_name }}" 
                            id="{{ form.nombre_usuario.id_for_label }}"
@@ -21,7 +70,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label for="{{ form.ciudad.id_for_label }}" class="form-label">Ciudad</label>
+                    <label for="{{ form.ciudad.id_for_label }}" class="form-label text-white">Ciudad</label>
                     <input type="text" 
                            name="{{ form.ciudad.html_name }}" 
                            id="{{ form.ciudad.id_for_label }}"
@@ -31,7 +80,7 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label for="{{ form.edad_min.id_for_label }}" class="form-label">Edad mínima</label>
+                    <label for="{{ form.edad_min.id_for_label }}" class="form-label text-white">Edad mínima</label>
                     <input type="number" 
                            name="{{ form.edad_min.html_name }}" 
                            id="{{ form.edad_min.id_for_label }}"
@@ -40,7 +89,7 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label for="{{ form.edad_max.id_for_label }}" class="form-label">Edad máxima</label>
+                    <label for="{{ form.edad_max.id_for_label }}" class="form-label text-white">Edad máxima</label>
                     <input type="number" 
                            name="{{ form.edad_max.html_name }}" 
                            id="{{ form.edad_max.id_for_label }}"
@@ -49,7 +98,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label for="{{ form.bio_contains.id_for_label }}" class="form-label">Buscar en biografía</label>
+                    <label for="{{ form.bio_contains.id_for_label }}" class="form-label text-white">Buscar en biografía</label>
                     <input type="text" 
                            name="{{ form.bio_contains.html_name }}" 
                            id="{{ form.bio_contains.id_for_label }}"
@@ -83,49 +132,10 @@
     {% endif %}
 
     <!-- Grid de usuarios -->
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="row">
         {% for usuario in usuarios %}
             {% if usuario != request.user %}
-
-                <div class="col">
-                    <div class="card h-100">
-                        <a href="{% url 'perfil_usuario' usuario.nombre_usuario %}" class="text-decoration-none text-dark">
-                        <!-- Foto de perfil -->
-                        {% if usuario.foto_perfil %}
-                            <img src="{{ usuario.foto_perfil.url }}" class="card-img-top" alt="Foto de perfil de {{ usuario.nombre_usuario }}" style="height: 200px; object-fit: cover;">
-                        {% else %}
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                <i class="bi bi-person-circle" style="font-size: 5rem;"></i>
-                            </div>
-                        {% endif %}
-
-                        <div class="card-body">
-                            <h5 class="card-title">{{ usuario.nombre_usuario }}</h5>
-                            
-                            <!-- Botón Seguir/Dejar de seguir -->
-                            {% if request.user.is_authenticated %}
-                                <div class="text-center mt-3">
-                                    {% if usuario in request.user.obtener_seguidos %}
-                                        <form action="{% url 'dejar_de_seguir_usuario' usuario.id %}" method="POST" class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-outline-danger">
-                                                Dejar de seguir
-                                            </button>
-                                        </form>
-                                    {% else %}
-                                        <form action="{% url 'seguir_usuario' usuario.id %}" method="POST" class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-warning">
-                                                Seguir
-                                            </button>
-                                        </form>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </a>
-                    </div>
-                </div>
+            {% include 'usuario/tarjeta_usuarios.html' %}
             {% endif %}
         {% empty %}
             <div class="col-12">
@@ -135,5 +145,6 @@
             </div>
         {% endfor %}
     </div>
+</div>
 </div>
 {% endblock %}
