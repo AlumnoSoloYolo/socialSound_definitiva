@@ -18,14 +18,27 @@ urlpatterns = [
      path('album/<int:album_id>/comentario/<int:comentario_id>/editar/', views.actualizar_comentario, name='editar_comentario'),
      path('album/<int:album_id>/comentarios/buscar/',  views.busqueda_avanzada_comentarios,  name='busqueda_avanzada_comentarios'),
      path('album/<int:album_id>/comentario/<int:comentario_id>/eliminar/', views.eliminar_comentario, name='eliminar_comentario'),
-      path('perfil/<str:nombre_usuario>/album/crear/', views.crear_album_con_canciones, name='crear_album'),
+     path('perfil/<str:nombre_usuario>/album/crear/', views.crear_album_con_canciones, name='crear_album'),
+     path('cancion/editar/<int:cancion_id>/', views.editar_cancion, name='editar_cancion'),
+     path('cancion/eliminar/<int:cancion_id>/', views.eliminar_cancion, name='eliminar_cancion'),
+     path('album/<int:album_id>/agregar-cancion/', views.agregar_cancion_album, name='agregar_cancion_album'),
+     path('busqueda/canciones/', views.busqueda_avanzada_canciones, name='busqueda_avanzada_canciones'),
+     path('playlist/crear/', views.crear_playlist, name='crear_playlist'),
+     path('playlists/<int:playlist_id>/editar/', views.editar_playlist, name='editar_playlist'),
+     path('playlists/<int:playlist_id>/agregar-cancion/', views.agregar_cancion_playlist, name='agregar_cancion_playlist'),
+     path('chat/<int:usuario_id>/', views.crear_mensaje_privado, name='chat'),
+     path('mensaje/editar/<int:mensaje_id>/', views.editar_mensaje, name='editar_mensaje'),
+     path('chats/', views.lista_chats, name='lista_chats'),
+     path('mensaje/eliminar/<int:mensaje_id>/', views.eliminar_mensaje, name='eliminar_mensaje'),
 
 
 
 
 
+    
+     path('usuarios-seguidos/', views.lista_seguidos, name='usuarios_seguidos'),
+     path('usuarios-seguidores/', views.lista_seguidores, name='usuarios_seguidores'),
 
-      path('usuarios-seguidos/', views.lista_seguidos, name='usuarios_seguidos'),
      path('', views.index, name='index'),  # Página de inicio con enlaces a todas las URLs
      path('mensajes_privados/<int:emisor_id>/<int:receptor_id>/', views.mensajes_privados, name='mensajes_privados'),
      re_path(r'^perfil_usuario/(?P<nombre_usuario>[a-zA-Z0-9_]+)/$', views.perfil_usuario, name='perfil_usuario'),

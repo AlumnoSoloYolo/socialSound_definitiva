@@ -1,0 +1,101 @@
+{% extends 'principal.html' %}
+
+{% block contenido %}
+<div class="container">
+    <h2 class="text-center mt-4">Mis Chats</h2>
+
+    <!-- Formulario de búsqueda avanzada -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#busquedaAvanzada">
+                Búsqueda Avanzada
+            </button>
+        </div>
+        <div class="collapse" id="busquedaAvanzada">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="col-md-6">
+                        {{ form.contenido.label_tag }}
+                        {{ form.contenido }}
+                        {% if form.contenido.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.contenido.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        {{ form.usuario.label_tag }}
+                        {{ form.usuario }}
+                        {% if form.usuario.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.usuario.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        {{ form.fecha_desde.label_tag }}
+                        {{ form.fecha_desde }}
+                        {% if form.fecha_desde.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.fecha_desde.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        {{ form.fecha_hasta.label_tag }}
+                        {{ form.fecha_hasta }}
+                        {% if form.fecha_hasta.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.fecha_hasta.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                        <a href="{% url 'lista_chats' %}" class="btn btn-secondary">Limpiar filtros</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de chats -->
+    <div class="list-group">
+        {% for usuario in usuarios %}
+            <div class="list-group-item list-group-item-action">
+                <a href="{% url 'chat' usuario.id %}" class="d-flex align-items-center text-decoration-none">
+                    {% if usuario.foto_perfil %}
+                        <img src="{{ usuario.foto_perfil.url }}" class="rounded-circle me-3" alt="Foto de {{ usuario.nombre_usuario }}" style="width: 50px; height: 50px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary me-3" style="width: 50px; height: 50px;"></div>
+                    {% endif %}
+                    <div>
+                        <h5 class="mb-0">{{ usuario.nombre_usuario }}</h5>
+                        <p class="mb-0 text-muted small">{{ usuario.bio|truncatechars:50 }}</p>
+                        {% if usuario.ultimo_mensaje %}
+                            <small class="text-muted">
+                                Último mensaje: {{ usuario.ultimo_mensaje.0.fecha_envio|date:"d/m/Y H:i" }}
+                            </small>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <p class="text-center mt-4">No se encontraron chats {% if form.is_bound %}con los filtros aplicados{% else %}creados aún{% endif %}.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

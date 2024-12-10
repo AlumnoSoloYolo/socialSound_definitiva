@@ -55,6 +55,11 @@
                             </li>
                             {% if user == album.usuario %}
                                 <li>
+                                    <a class="dropdown-item" href="{% url 'agregar_cancion_album' album_id=album.id %}">
+                                        <i class="fas fa-plus"></i> Añadir canción al álbum
+                                    </a>
+                                </li>
+                                <li>
                                     <form id="deleteForm-{{ album.id }}" 
                                           action="{% url 'eliminar_album' album.id %}" 
                                           method="post">
@@ -66,6 +71,7 @@
                                         </button>
                                     </form>
                                 </li>
+                                
                             {% endif %}
                         </ul>
                     </div>

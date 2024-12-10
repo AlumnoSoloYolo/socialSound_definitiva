@@ -195,28 +195,7 @@
             {% if album.canciones.all %}
                 <div class="list-group">
                     {% for cancion in album.canciones.all %}
-                    <div class="list-group-item bg-dark text-white mb-2">
-                        <div class="song-item">
-                          <div class="song-info">
-                            <span class="text-warning">{{ forloop.counter }}</span>
-                            <div>
-                              <h5 class="mb-0">{{ cancion.titulo }}</h5>
-                              <small class="text-white">{{ cancion.artista }}</small>
-                            </div>
-                          </div>
-                          <a href="{% url 'detalle_cancion' cancion.id %}" class="btn btn-warning btn-details">
-                            <i class="fas fa-info-circle"></i>
-                          </a>
-                          <div class="audio-controls">
-                           
-                            <div class="custom-audio-player">
-                              <audio controls class="custom-audio">
-                                <source src="{{ cancion.archivo_audio.url }}" type="audio/mpeg">
-                              </audio>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                    {% include 'cancion/cancion.html' %}
                     {% endfor %}
                 </div>
             {% else %}

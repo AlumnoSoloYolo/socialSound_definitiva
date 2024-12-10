@@ -53,7 +53,7 @@
 {% block contenido %}
 <div class="container-busqueda">
 
-    {% if messages %}
+    {% comment %} {% if messages %}
     {% for message in messages %}
         {% if message.tags == "success" %}
             <div class="alert alert-success mt-6 alert-dismissible fade show" role="alert">
@@ -67,7 +67,7 @@
             </div>
         {% endif %}
     {% endfor %}
-{% endif %}
+{% endif %} {% endcomment %}
 
        
 <div class="container py-5">
@@ -135,7 +135,7 @@
                             </div>
                         </div>
                         <div class="col-12 col-sm-4">
-                            <a href="#" class="text-decoration-none" style="color: inherit">
+                            <a href="{% url 'usuarios_seguidores' %}" class="text-decoration-none" style="color: inherit">
                                 <div class="stat-card bg-warning bg-opacity-10 p-3 rounded">
                                     <h3 class="mb-1">{{ total_seguidores }}</h3>
                                     <span class="text-warning">Seguidores</span>
@@ -172,6 +172,11 @@
                         <a href="{% url 'canciones_guardadas' usuario.nombre_usuario %}" class="btn btn-outline-warning">
                             <i class="fa-solid fa-bookmark me-2"></i>Guardados
                         </a>
+                        {%if usuario.id != request.user.id%}
+                        <a href="{% url 'chat' usuario.id %}" class="btn btn-outline-warning">
+                            <i class="fab fa-rocketchat"></i> enviar mensaje
+                        </a>
+                        {%endif%}
                     </div>
                 </div>
             </div>
@@ -194,10 +199,18 @@
                 {% include 'usuario/album_usuario.html' with album=album %}
             {% empty %}
                 <div class="col-12">
+
+                    {% if user == usuario%}
+                    <div class="alert alert-warning text-center">
+                        <i class="fa-solid fa-compact-disc me-2"></i>
+                        No tienes albumes subidos.
+                    </div>
+                    {% else %}
                     <div class="alert alert-warning text-center">
                         <i class="fa-solid fa-compact-disc me-2"></i>
                         No hay álbumes subidos por este usuario.
                     </div>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>

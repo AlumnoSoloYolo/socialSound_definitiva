@@ -1,0 +1,22 @@
+{% extends 'principal.html' %}
+
+
+
+{% block contenido %}
+
+<h2>Usuarios que te siguen</h2>
+<div class="row">
+    {% for usuario in usuarios_seguidores %}
+        {% if usuario != request.user %}
+            {% include 'usuario/tarjeta_usuarios.html' %}
+        {% endif %}
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning">
+                No tienes seguidores.
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

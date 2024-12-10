@@ -1,54 +1,13 @@
 {% extends 'principal.html' %}
 
+{% load static %}
 {% block extra_css %}
-<style>
-    .container-busqueda {
-        min-height: calc(100vh - 60px);
-        background: #0a0a0a;
-        position: relative;
-        margin-top: -24px; /* Elimina el espacio blanco */
-        padding-top: 22px;
-        
-      }
+<link rel="stylesheet" href="{% static 'css/fondo_estrella.css' %}">
 
-.stars {
-    position: fixed;
-    top: 60px; /* Ajusta este valor a la altura de tu header */
-    left: 0;
-    width: 100%;
-    height: calc(100vh - 60px); /* Ajusta para que no cubra el header */
-    pointer-events: none;
- }
-
-
-
-.stars::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
-        radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
-        radial-gradient(2px 2px at 50px 160px, #ffffff, transparent),
-        radial-gradient(2px 2px at 90px 40px, #ffffff, transparent),
-        radial-gradient(2px 2px at 130px 80px, #ffffff, transparent),
-        radial-gradient(2px 2px at 160px 120px, #ffffff, transparent);
-    background-repeat: repeat;
-    background-size: 200px 200px;
-    animation: twinkle 5s linear infinite;
-
-}
-
-@keyframes twinkle {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-200px); }
-}
-</style>
 {% endblock %}
 
 {% block contenido %}
-<div class="container-busqueda">
+<div class="container-star">
 <div class="container mt-4">
     <div class="stars"></div>
     <h2 class="mb-4 text-warning">Búsqueda Avanzada de Usuarios</h2>

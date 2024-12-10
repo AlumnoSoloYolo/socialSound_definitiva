@@ -1,9 +1,10 @@
 from django.forms import ModelForm
 from django import forms
-from .models import Usuario, Album, DetalleAlbum, Comentario, Cancion, DetallesCancion
+from .models import Usuario, Album, DetalleAlbum, Comentario, Cancion, DetallesCancion, Playlist, MensajePrivado
 from datetime import date
 import re
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 class UsuarioModelForm(ModelForm):
     email = forms.EmailField(
@@ -376,7 +377,6 @@ class BusquedaAvanzadaAlbumForm(forms.Form):
 
 
 
-# forms.py - Actualizar la clase CancionForm
 class CancionForm(ModelForm):
     class Meta:
         model = Cancion
@@ -386,25 +386,49 @@ class CancionForm(ModelForm):
             'required': True}),
             'artista': forms.TextInput(attrs={'class': 'form-control',
             'required': True}),
-            'archivo_audio': forms.FileInput(attrs={'class': 'form-control',
-            'required': True}),
+            'archivo_audio': forms.FileInput(attrs={'class': 'form-control'}),
             'portada': forms.FileInput(attrs={'class': 'form-control'}),
             'etiqueta': forms.Select(attrs={'class': 'form-control',
             'required': True})
         }
-        error_messages = {
-            'archivo_audio': {
-                'required': 'El archivo de audio es obligatorio'
-            }
-        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si estamos editando una canción existente
+        if self.instance and self.instance.pk:
+            self.fields['archivo_audio'].required = False
 
     def clean(self):
         cleaned_data = super().clean()
-        if not cleaned_data.get('archivo_audio'):
-            raise ValidationError('El archivo de audio es obligatorio')
+        errors = {}
+
+        # Validación del título
+        titulo = cleaned_data.get('titulo')
+        if not titulo:
+            errors['titulo'] = 'El título es obligatorio'
+        elif len(titulo) < 3:
+            errors['titulo'] = 'El título debe tener al menos 3 caracteres'
+        elif len(titulo) > 200:
+            errors['titulo'] = 'El título no puede exceder los 200 caracteres'
+
+        # Validación del archivo de audio
+        archivo = cleaned_data.get('archivo_audio')
+        # Solo validar el archivo si se está subiendo uno nuevo
+        if archivo:
+            if not archivo.name.endswith(('.wav', '.mp3')):
+                errors['archivo_audio'] = 'Solo se permiten archivos .wav o .mp3'
+            elif archivo.size > 70 * 1024 * 1024:  
+                errors['archivo_audio'] = 'El archivo no puede ser mayor a 70MB'
+        # Solo requerir archivo si es una nueva canción
+        elif not self.instance.pk:
+            errors['archivo_audio'] = 'El archivo de audio es obligatorio'
+
+        if errors:
+            raise ValidationError(errors)
+
         return cleaned_data
 
-class DetallesCancionForm(forms.ModelForm):
+class DetallesCancionForm(ModelForm):
     class Meta:
         model = DetallesCancion
         fields = ['letra', 'creditos', 'duracion', 'idioma']
@@ -414,6 +438,102 @@ class DetallesCancionForm(forms.ModelForm):
             'duracion': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'idioma': forms.TextInput(attrs={'class': 'form-control'})
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        errors = {}
+
+        duracion = cleaned_data.get('duracion')
+        if not duracion:
+            errors['duracion'] = 'La duración es obligatoria'
+      
+        creditos = cleaned_data.get('creditos')
+        if creditos and len(creditos) > 1000:
+            errors['creditos'] = 'Los créditos no pueden exceder los 1000 caracteres'
+
+
+        if errors:
+            raise ValidationError(errors)
+
+        return cleaned_data
+
+
+class BusquedaAvanzadaCancionForm(forms.Form):
+    titulo = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Buscar por título'
+        })
+    )
+    
+    artista = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Buscar por artista'
+        })
+    )
+    
+    etiqueta = forms.ChoiceField(
+        choices=[('', 'Todas las categorías')] + Cancion.CATEGORIAS_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+    
+    fecha_desde = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+    
+    fecha_hasta = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+    
+    album = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Buscar por álbum'
+        })
+    )
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+        errors = {}
+
+        if not any(cleaned_data.values()):
+           raise ValidationError('Debes especificar al menos un criterio de búsqueda')
+
+        # Validar fechas
+        fecha_desde = cleaned_data.get('fecha_desde')
+        fecha_hasta = cleaned_data.get('fecha_hasta')
+        if fecha_desde and fecha_hasta and fecha_desde > fecha_hasta:
+            errors['fecha_desde'] = 'La fecha inicial no puede ser posterior a la fecha final'
+            errors['fecha_hasta'] = 'La fecha final no puede ser anterior a la fecha inicial'
+
+        # Validar longitud mínima de búsqueda
+        for field in ['titulo', 'artista', 'album']:
+            value = cleaned_data.get(field)
+            if value and len(value) < 3:
+                errors[field] = f'Ingresa al menos 3 caracteres para buscar por {field}'
+
+        if errors:
+            raise ValidationError(errors)
+
+        return cleaned_data
+
+
 
 
 class ComentarioModelForm(ModelForm):
@@ -432,7 +552,7 @@ class ComentarioModelForm(ModelForm):
         fields = ['contenido']
 
     def __init__(self, *args, **kwargs):
-        # CLAVE 1: El constructor del formulario
+        # El constructor del formulario
         # Si pasamos una instancia al formulario (comentario existente),
         # automáticamente se rellenarán los campos con los valores existentes
         super().__init__(*args, **kwargs)
@@ -511,5 +631,131 @@ class BusquedaAvanzadaComentarioForm(forms.Form):
 
         if contenido and len(contenido) < 3:
             raise forms.ValidationError("El texto de búsqueda debe tener al menos tres caracteres")
+
+        return cleaned_data
+
+
+
+class PlaylistForm(ModelForm):
+
+    class Meta:
+        model = Playlist
+        fields = ['nombre', 'descripcion', 'publica']
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre de la playlist'
+            }),
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Descripción de la playlist'
+            }),
+            'publica': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            })
+        }
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        nombre = cleaned_data.get('nombre')
+        descripcion = cleaned_data.get('descripcion')
+        
+    
+        if nombre and len(nombre) < 3:
+            self.add_error('nombre', 'El nombre de la playlist debe tener al menos 3 caracteres.')
+        
+        if descripcion and len(descripcion) > 500:
+            self.add_error('descripcion', 'La descripción no puede tener más de 500 caracteres.')
+
+        return cleaned_data
+
+    
+
+class MensajePrivadoForm(ModelForm):
+    class Meta:
+        model = MensajePrivado
+        fields = ['contenido']
+        widgets = {
+                'contenido': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Escribe tu comentario aquí...',
+                'rows': 3,
+                'cols': 50
+            })
+        }
+    def clean(self):
+
+        contenido = self.cleaned_data.get('contenido')
+        
+    
+        if not contenido or contenido.isspace():
+            raise forms.ValidationError("El mensaje no puede estar vacío o contener solo espacios")
+        
+        
+        if len(contenido.strip()) < 1:
+            raise forms.ValidationError("El mensaje debe contener al menos 1 carácter")
+            
+       
+        if len(contenido) > 1000:
+            raise forms.ValidationError("El mensaje no puede exceder los 1000 caracteres")
+
+
+class BusquedaMensajesForm(forms.Form):
+    contenido = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Buscar en mensajes...'
+        })
+    )
+    
+    usuario = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nombre de usuario...'
+        })
+    )
+    
+    fecha_desde = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+    
+    fecha_hasta = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha_desde = cleaned_data.get('fecha_desde')
+        fecha_hasta = cleaned_data.get('fecha_hasta')
+
+        # Validar que fecha_hasta no sea anterior a fecha_desde
+        if fecha_desde and fecha_hasta and fecha_hasta < fecha_desde:
+            raise forms.ValidationError(
+                "La fecha final no puede ser anterior a la fecha inicial"
+            )
+
+        # Validar que las fechas no sean futuras
+        hoy = timezone.now().date()
+        if fecha_hasta and fecha_hasta > hoy:
+            raise forms.ValidationError(
+                "La fecha final no puede ser futura"
+            )
+        if fecha_desde and fecha_desde > hoy:
+            raise forms.ValidationError(
+                "La fecha inicial no puede ser futura"
+            )
 
         return cleaned_data

@@ -1,4 +1,23 @@
-<li>
-    <p>{{ playlist.nombre }}</p>
-    <a href="{% url 'canciones_playlist' playlist.id %}">ver canciones</a>
-</li>
+<div class="col-md-4 mb-4">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ playlist.nombre }}</h5>
+            <p class="card-text">{{ playlist.descripcion }}</p>
+            <p class="text-muted">
+                {{ playlist.canciones.count }} canciones
+                {% if not playlist.publica %}
+                    <i class="fas fa-lock ms-2"></i>
+                {% endif %}
+            </p>
+
+            <ul class="d-flex list-unstyled">
+                <li>
+                    <a href="{% url 'editar_playlist' playlist_id=playlist.id %}" class="btn btn-secondary btn-sm me-4">Editar</a>
+                </li>
+                <li>
+                    <a href="{% url 'canciones_playlist' playlist.id %}" class="btn btn-warning btn-sm">Ver playlist</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

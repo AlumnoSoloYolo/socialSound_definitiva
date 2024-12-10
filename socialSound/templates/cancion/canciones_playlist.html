@@ -1,32 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Canciones de la Playlist</title>
-
-</head>
-
 {% extends 'principal.html' %}
 
-<body>
-    {% block contenido %}
-    <a href="{% url 'lista_playlist' playlist.usuario.nombre_usuario %}">{{playlist.usuario.nombre_usuario
-        }}</a><br>
-    <a href="{% url 'index' %}">Volver al inicio</a>
+{% block contenido %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Canciones en la Playlist: {{ playlist.nombre }}</h2>
+        <a href="{% url 'agregar_cancion_playlist' playlist_id=playlist.id %}" class="btn btn-primary">Agregar canción</a>
+    </div>
 
-    <h2>Canciones en la Playlist: {{ playlist.nombre }}</h2>
-
-    <ul>
+    <ul class="list-group">
         {% for cancion in playlist.canciones.all %}
-        {% include 'cancion/cancion-playlist.html' %}
+        <li class="list-group-item">
+            {% include 'cancion/cancion.html' %}
+        </li>
         {% empty %}
-        <li>No hay canciones en esta playlist.</li>
+        <li class="list-group-item">No hay canciones en esta playlist.</li>
         {% endfor %}
     </ul>
-
-    {% endblock %}
-</body>
-
-</html>
+</div>
+{% endblock %}
