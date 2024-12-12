@@ -61,15 +61,10 @@
                    </div>
                    
                    <div class="col-md-6">
-                       <p><strong class="text-warning">Likes:</strong> {{ estadisticas_album.likes }}</p>
-                       <p><strong class="text-warning">Reproducciones:</strong> {{ estadisticas_album.reproducciones|floatformat }}</p>
-                       <p><strong class="text-warning">Comentarios:</strong>
-                           {% if estadisticas_album.comentarios == 0 %}
-                           Sin comentarios aún.
-                           {% else %}
-                           {{ estadisticas_album.comentarios }}
-                           {% endif %}
-                       </p>
+                    <p>Reproducciones: {{ album.detalle_album.reproducciones }}</p>
+                    <p>Comentarios: {{ album.detalle_album.numero_comentarios }}</p>
+                    <p>Reposts: {{ album.detalle_album.numero_reposts }}</p>
+                    
                    </div>
                </div>
            </div>

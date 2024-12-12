@@ -11,12 +11,25 @@
             </p>
 
             <ul class="d-flex list-unstyled">
+
+                {% if request.user == playlist.usuario %}
                 <li>
                     <a href="{% url 'editar_playlist' playlist_id=playlist.id %}" class="btn btn-secondary btn-sm me-4">Editar</a>
                 </li>
+                {% endif %}
+
+                {% if playlist.publica or request.user == playlist.usuario %}
                 <li>
                     <a href="{% url 'canciones_playlist' playlist.id %}" class="btn btn-warning btn-sm">Ver playlist</a>
                 </li>
+                {% else %}
+                <li>
+                    <button class="btn btn-secondary btn-sm" disabled>
+                        <i class="fas fa-lock me-1"></i>Playlist privada
+                    </button>
+                </li>
+                 {% endif %}
+            
             </ul>
         </div>
     </div>

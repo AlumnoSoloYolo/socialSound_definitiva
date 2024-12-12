@@ -25,7 +25,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
    email = models.EmailField(unique=True)
    bio = models.TextField(blank=True)
    ciudad = models.CharField(max_length=150, blank=True)
-   foto_perfil = models.ImageField(upload_to='fotos_perfil/', blank=True)
+   foto_perfil = models.ImageField(upload_to='fotos_perfil/',default='fotos_perfil/default_profile.png', blank=True)
    fecha_nac = models.DateField()
    is_active = models.BooleanField(default=True)
    is_staff = models.BooleanField(default=False)
@@ -93,6 +93,18 @@ class DetalleAlbum(models.Model):
     estudio_grabacion = models.CharField(max_length=200, blank=True)
     numero_pistas = models.PositiveIntegerField()
     sello_discografico = models.CharField(max_length=100, blank=True)
+
+    @property
+    def numero_comentarios(self):
+        return self.album.comentario_set.count()
+    
+    @property
+    def numero_reposts(self):
+        return self.album.reposts.count()
+
+    def incrementar_reproducciones(self):
+        self.reproducciones += 1
+        self.save()
 
 
 # Modelo de Estadísticas del Álbum (OneToOne)

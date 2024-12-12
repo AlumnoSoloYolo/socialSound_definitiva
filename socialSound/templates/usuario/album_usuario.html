@@ -20,7 +20,7 @@
             <h5 class="card-title text-warning fw-bold mb-3">{{ album.titulo }}</h5>
             <p class="card-text text-light mb-2"><strong>Artista:</strong> {{ album.artista|upper }}</p>
             {% if album.descripcion %}
-                <p class="card-text text-light-50 small mb-3">{{ album.descripcion|lower }}</p>
+                <p class="card-text text-light-50 small mb-3">{{ album.descripcion|truncatechars:200 }}</p>
             {% endif %}
             <p class="card-text text-light-50 small mb-3">
                 <i class="bi bi-calendar"></i> {{ album.fecha_subida|date:"d/m/Y"}}

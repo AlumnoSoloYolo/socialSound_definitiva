@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Sum, Q, Prefetch, Count
 from .models import Usuario, Album, Cancion, Playlist, CancionPlaylist, Guardado, MensajePrivado, Comentario, EstadisticasAlbum, DetalleAlbum
 from django.views.defaults import page_not_found
-from .forms import UsuarioModelForm, LoginForm, BusquedaAvanzadaUsuarioForm, AlbumModelForm, DetalleAlbumModelForm, BusquedaAvanzadaAlbumForm, ComentarioModelForm, BusquedaAvanzadaComentarioForm, CancionForm, DetallesCancionForm, BusquedaAvanzadaCancionForm, PlaylistForm, MensajePrivadoForm, BusquedaMensajesForm
+from .forms import UsuarioModelForm, LoginForm, BusquedaAvanzadaUsuarioForm, AlbumModelForm, DetalleAlbumModelForm, BusquedaAvanzadaAlbumForm, ComentarioModelForm, BusquedaAvanzadaComentarioForm, CancionForm, DetallesCancionForm, BusquedaAvanzadaCancionForm, PlaylistForm, MensajePrivadoForm, BusquedaMensajesForm, UsuarioUpdateForm
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from dateutil.relativedelta import relativedelta
@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.contrib.auth import logout
 from django.db import transaction
-from django.forms import formset_factory
+from django.forms import formset_factory, modelformset_factory
 from django.db.models import Max
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -20,28 +20,45 @@ from django.core.exceptions import ObjectDoesNotExist
  
 
 def registro_usuario(request):
-    if request.method == 'POST':
-        form = UsuarioModelForm(request.POST, request.FILES)
-        if form.is_valid():
-            usuario = form.save(commit=False)
-            raw_password = form.cleaned_data.get('password')
-            usuario.set_password(raw_password)
-
-            if not usuario.foto_perfil: 
-                usuario.foto_perfil = 'media/fotos_perfil/default_profile.png'
-
-            usuario.save()
+    datosFormulario = None
+    mostrar_errores = False
+    
+    if request.method == "POST":
+        datosFormulario = request.POST
+        mostrar_errores = True
+        
+    form = UsuarioModelForm(datosFormulario, request.FILES)
+    
+    if request.method == "POST":
+        usuario_creado = crear_usuario(form)
+        if usuario_creado:
             messages.success(request, '¡Te has registrado con éxito!')
             return redirect('login_usuario')
         else:
-            messages.error(request, 'Error en el registro de usuario')
-    else:
-        form = UsuarioModelForm()
-
+            messages.error(request, 'Error al intentar registrarte')
+            
     return render(request, 'CRUD_usuario/registro_usuario.html', {
         'form': form,
-        'title': 'Registro de usuario'
+        'title': 'Registro de usuario',
+        'mostrar_errores': mostrar_errores
     })
+
+def crear_usuario(form):
+    usuario_creado = False
+    if form.is_valid():
+        try:
+            usuario = form.save(commit=False)
+            raw_password = form.cleaned_data.get('password')
+            usuario.set_password(raw_password)
+            
+            if not usuario.foto_perfil:
+                usuario.foto_perfil = 'media/fotos_perfil/default_profile.png'
+                
+            usuario.save()
+            usuario_creado = True
+        except Exception as error:
+            print(error)
+    return usuario_creado
 
 
 def login_usuario(request):
@@ -71,16 +88,30 @@ def logout_view(request):
 @login_required
 def actualizar_perfil(request, nombre_usuario):
     usuario = Usuario.objects.get(nombre_usuario=nombre_usuario)
-    if request.method == 'POST':
-        form = UsuarioModelForm(request.POST, request.FILES, instance=usuario)
+    
+    datosFormulario = None
+    archivos = None
+    
+    if request.method == "POST":
+        datosFormulario = request.POST
+        archivos = request.FILES
+    
+    form = UsuarioUpdateForm(datosFormulario, archivos, instance=usuario)
+    
+    if request.method == "POST":
         if form.is_valid():
-            usuario_actualizado = form.save()
-            form.save()
-            messages.success(request, 'Perfil actualizado correctamente.')
-            return redirect('perfil_usuario', nombre_usuario=usuario_actualizado.nombre_usuario)
-    else:
-        form = UsuarioModelForm(instance=usuario)
-    return render(request, 'CRUD_usuario/actualizar_perfil.html', {'form': form, 'usuario': usuario})
+            try:
+                usuario_actualizado = form.save()
+                messages.success(request, f'Se ha actualizado el perfil de {usuario_actualizado.nombre_usuario} correctamente')
+                return redirect('perfil_usuario', nombre_usuario=usuario_actualizado.nombre_usuario)
+            except Exception as error:
+                print(error)
+                messages.error(request, 'Ha ocurrido un error al actualizar el perfil')
+    
+    return render(request, 'CRUD_usuario/actualizar_perfil.html', {
+        "form": form,
+        "usuario": usuario
+    })
 
 @login_required
 def eliminar_usuario(request, nombre_usuario):
@@ -94,38 +125,41 @@ def eliminar_usuario(request, nombre_usuario):
 @login_required
 def busqueda_avanzada_usuarios(request):
     form = BusquedaAvanzadaUsuarioForm(request.GET or None)
-    usuarios = Usuario.objects.all();
-    filtros_aplicados=[]
+    usuarios = Usuario.objects.all()
+    filtros_aplicados = []
 
-    if form.is_valid():
+    # Solo procesar si hay datos GET
+    if request.GET:
+        if form.is_valid():
+            if nombre_usuario := form.cleaned_data.get('nombre_usuario'):
+                usuarios = usuarios.filter(nombre_usuario__icontains=nombre_usuario)
+                filtros_aplicados.append(f"nombre: {nombre_usuario}")
 
-        if nombre_usuario := form.cleaned_data.get('nombre_usuario'):
-            usuarios = usuarios.filter(nombre_usuario__icontains=nombre_usuario)
-            filtros_aplicados.append(f"nombre: {nombre_usuario}")
+            if ciudad := form.cleaned_data.get('ciudad'):
+                usuarios = usuarios.filter(ciudad__icontains=ciudad)
+                filtros_aplicados.append(f"Ciudad: {ciudad}")
+            
+            if edad_min := form.cleaned_data.get('edad_min'):
+                fecha_max = date.today() - relativedelta(years=edad_min)
+                usuarios = usuarios.filter(fecha_nac__lte=fecha_max)
+                filtros_aplicados.append(f"Edad mínima: {edad_min} años")
 
-        if ciudad := form.cleaned_data.get('ciudad'):
-            usuarios=usuarios.filter(ciudad__icontains=ciudad)
-            filtros_aplicados.append(f"Ciudad: {ciudad}")
-        
-        if edad_min := form.cleaned_data.get('edad_min'):
-            fecha_min = date.today() - relativedelta(years=edad_min+1)
-            usuarios=usuarios.filter(fecha_nac__gte=fecha_min)
-            filtros_aplicados.append(f"Edad mínima: {edad_min} años")
-
-        if edad_max := form.cleaned_data.get('edad_max'):
-            fecha_min = date.today() - relativedelta(years=edad_max+1)
-            usuarios = usuarios.filter(fecha_nac__gte=fecha_min)
-            filtros_aplicados.append(f"Edad máxima: {edad_max} años")
-        
-        if bio := form.cleaned_data.get('bio_contains'):
-            usuarios = usuarios.filter(bio__icontains=bio)
-            filtros_aplicados.append(f"Biografía contiene: {bio}")
-        
+            if edad_max := form.cleaned_data.get('edad_max'):
+                fecha_min = date.today() - relativedelta(years=edad_max)
+                usuarios = usuarios.filter(fecha_nac__gte=fecha_min)
+                filtros_aplicados.append(f"Edad máxima: {edad_max} años")
+            
+            if bio := form.cleaned_data.get('bio_contains'):
+                usuarios = usuarios.filter(bio__icontains=bio)
+                filtros_aplicados.append(f"Biografía contiene: {bio}")
+        else:
+            filtros_aplicados.append("Error en los filtros ingresados")
+    
     return render(request, 'CRUD_usuario/busqueda_avanzada_usuarios.html', {
-            'form': form,
-            'usuarios': usuarios,
-            'filtros_aplicados': filtros_aplicados
-        })
+        'form': form,
+        'usuarios': usuarios,
+        'filtros_aplicados': filtros_aplicados
+    })
 
 @login_required
 def seguir_usuario(request, usuario_id):
@@ -144,51 +178,51 @@ def dejar_de_seguir_usuario(request, usuario_id):
 
 @login_required
 def crear_album(request, nombre_usuario):
-    # Verificar que el usuario que está creando el álbum sea el mismo que está logueado
     if request.user.nombre_usuario != nombre_usuario:
         return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
     
-    if request.method == 'POST':
-        album_form = AlbumModelForm(request.POST, request.FILES)
-        detalle_form = DetalleAlbumModelForm(request.POST)
-
-      
-        print("Datos recibidos para productor:", request.POST.get('productor'))
+    datosFormulario = None
+    if request.method == "POST":
+        datosFormulario = request.POST
         
-        if album_form.is_valid() and detalle_form.is_valid():
-           
-            album = album_form.save(commit=False)
-            album.usuario = request.user
-            album.save()
-
-           
-            estadisticas_album = EstadisticasAlbum(album=album)
-            estadisticas_album.save()
-
-          
-            detalleAlbum = detalle_form.save(commit=False)
-            detalleAlbum.album = album
-            detalleAlbum.save()
-
+    album_form = AlbumModelForm(datosFormulario, request.FILES)
+    detalle_form = DetalleAlbumModelForm(datosFormulario)
+    
+    if request.method == "POST":
+        album_creado = crear_album_completo(album_form, detalle_form, request.user)
+        if album_creado:
             messages.success(request, 'Álbum creado correctamente.')
             return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
         else:
-          
-            print("Errores en el formulario:", detalle_form.errors)
-
-    else:
-        album_form = AlbumModelForm()
-        detalle_form = DetalleAlbumModelForm()
-        
-        print("Errores en el formulario:", detalle_form.errors)
-    
-   
+            messages.error(request, 'Error al crear el álbum')
+            
     return render(request, 'CRUD_album/crear_album.html', {
         'album_form': album_form,
         'detalle_form': detalle_form,
         'title': 'Crear Nuevo Álbum',
         'operation': 'Crear'
     })
+
+def crear_album_completo(album_form, detalle_form, usuario):
+    album_creado = False
+    if album_form.is_valid() and detalle_form.is_valid():
+        try:
+            with transaction.atomic():
+                album = album_form.save(commit=False)
+                album.usuario = usuario
+                album.save()
+
+                estadisticas_album = EstadisticasAlbum(album=album)
+                estadisticas_album.save()
+
+                detalle_album = detalle_form.save(commit=False)
+                detalle_album.album = album
+                detalle_album.save()
+                
+                album_creado = True
+        except Exception as error:
+            print(error)
+    return album_creado
 
 
 
@@ -297,12 +331,18 @@ def crear_album_con_canciones(request, nombre_usuario):
                cancion_formset.is_valid(), detalles_cancion_formset.is_valid()]):
             try:
                 with transaction.atomic():
+
+                    numero_pistas = sum(
+                        1 for form in cancion_formset 
+                        if form.cleaned_data and not form.cleaned_data.get('DELETE', False)
+                    )
                     album = album_form.save(commit=False)
                     album.usuario = request.user
                     album.save()
 
                     detalle_album = detalle_album_form.save(commit=False)
                     detalle_album.album = album
+                    detalle_album.numero_pistas = numero_pistas 
                     detalle_album.save()
 
                     EstadisticasAlbum.objects.create(album=album)
@@ -342,6 +382,7 @@ def crear_album_con_canciones(request, nombre_usuario):
        
     }
     return render(request, 'CRUD_album/crear_album_canciones.html', context)
+
 
 @login_required
 def editar_cancion(request, cancion_id):
@@ -453,36 +494,42 @@ def busqueda_avanzada_canciones(request):
 ### CRUD Comentario
 @login_required
 def crear_comentario(request, album_id):
-
     album = Album.objects.get(id=album_id)
-
-    if request.method == 'POST':
-        form = ComentarioModelForm(request.POST)
-
-        if form.is_valid():
-            comentario = form.save(commit=False)
-            comentario.usuario = request.user
-            comentario.album = album
-            comentario.save()
+    
+    datosFormulario = None
+    if request.method == "POST":
+        datosFormulario = request.POST
+        
+    form = ComentarioModelForm(datosFormulario)
+    
+    if request.method == "POST":
+        comentario_creado = crear_comentario_album(form, request.user, album)
+        if comentario_creado:
             messages.success(request, 'Tu comentario se ha publicado con éxito')
             return redirect('comentarios_album', album_id=album.id)
         else:
-            messages.error(request, 'Hubo un error al publicar tu comentario. Por favor, verifica los datos e inténtalo de nuevo.')
-            return redirect('comentarios_album', album_id=album.id)
+            messages.error(request, 'Hubo un error al publicar tu comentario')
 
-    else:
-        form = ComentarioModelForm()
-
-    # Obtenemos los comentarios existentes para mostrar en la página
     comentarios = Comentario.objects.filter(album=album).order_by('-fecha_publicacion')
     
-    context = {
+    return render(request, 'CRUD_comentario/crear_comentario.html', {
         'form': form,
         'album': album,
         'comentarios': comentarios
-    }
-    
-    return render(request, 'CRUD_comentario/crear_comentario.html', context)
+    })
+
+def crear_comentario_album(form, usuario, album):
+    comentario_creado = False
+    if form.is_valid():
+        try:
+            comentario = form.save(commit=False)
+            comentario.usuario = usuario
+            comentario.album = album
+            comentario.save()
+            comentario_creado = True
+        except Exception as error:
+            print(error)
+    return comentario_creado
 
 
 @login_required
@@ -559,21 +606,36 @@ def eliminar_comentario(request, album_id, comentario_id):
 ## CRUD playlists
 @login_required
 def crear_playlist(request):
-    if request.method == 'POST':
-        form = PlaylistForm(request.POST)
-        if form.is_valid():
-            playlist = form.save(commit=False)
-            playlist.usuario = request.user
-            playlist.save()
+    datosFormulario = None
+    if request.method == "POST":
+        datosFormulario = request.POST
+        
+    form = PlaylistForm(datosFormulario)
+    
+    if request.method == "POST":
+        playlist_creada = crear_playlist_usuario(form, request.user)
+        if playlist_creada:
             messages.success(request, 'Playlist creada exitosamente')
             return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
-    else:
-        form = PlaylistForm()
+        else:
+            messages.error(request, 'Error al crear la playlist')
     
     return render(request, 'CRUD_playlist/crear_playlist.html', {
         'form': form,
         'title': 'Crear Nueva Playlist'
     })
+
+def crear_playlist_usuario(form, usuario):
+    playlist_creada = False
+    if form.is_valid():
+        try:
+            playlist = form.save(commit=False)
+            playlist.usuario = usuario
+            playlist.save()
+            playlist_creada = True
+        except Exception as error:
+            print(error)
+    return playlist_creada
 
 @login_required
 def editar_playlist(request, playlist_id):
@@ -625,27 +687,24 @@ def agregar_cancion_playlist(request, playlist_id):
 def crear_mensaje_privado(request, usuario_id):
     try:
         otro_usuario = Usuario.objects.get(id=usuario_id)
-        
-            
         mensajes = MensajePrivado.objects.filter(
             Q(emisor=request.user, receptor=otro_usuario) |
             Q(emisor=otro_usuario, receptor=request.user)
         ).order_by('fecha_envio')
 
-        if request.method == 'POST':
-            if 'enviar_mensaje' in request.POST:
-                form = MensajePrivadoForm(request.POST)
-                if form.is_valid():
-                    mensaje = form.save(commit=False)
-                    mensaje.emisor = request.user
-                    mensaje.receptor = otro_usuario
-                    mensaje.save()
-                    messages.success(request, "Mensaje enviado correctamente")
-                    return redirect('chat', usuario_id=usuario_id)
-                else:
-                    messages.error(request, "Por favor, corrige los errores en el formulario")
-        else:
-            form = MensajePrivadoForm()
+        datosFormulario = None
+        if request.method == "POST":
+            datosFormulario = request.POST
+            
+        form = MensajePrivadoForm(datosFormulario)
+        
+        if request.method == "POST" and 'enviar_mensaje' in request.POST:
+            mensaje_creado = crear_mensaje(form, request.user, otro_usuario)
+            if mensaje_creado:
+                messages.success(request, "Mensaje enviado correctamente")
+                return redirect('chat', usuario_id=usuario_id)
+            else:
+                messages.error(request, "Error al enviar el mensaje")
 
         return render(request, 'CRUD_mensajePrivado/crear_chat.html', {
             'mensajes': mensajes,
@@ -654,7 +713,20 @@ def crear_mensaje_privado(request, usuario_id):
         })
     except ObjectDoesNotExist:
         messages.error(request, "El usuario no existe")
-        return redirect('home') 
+        return redirect('home')
+
+def crear_mensaje(form, emisor, receptor):
+    mensaje_creado = False
+    if form.is_valid():
+        try:
+            mensaje = form.save(commit=False)
+            mensaje.emisor = emisor
+            mensaje.receptor = receptor
+            mensaje.save()
+            mensaje_creado = True
+        except Exception as error:
+            print(error)
+    return mensaje_creado 
 
 
 ## busqued avanzada de mensajes que he implementado en el template de listas de chats

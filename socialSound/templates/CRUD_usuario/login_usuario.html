@@ -15,14 +15,6 @@
             </div>
 
             <div class="card-body p-4">
-                <!-- Mensajes generales -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} mb-4" role="alert">
-                            <i class="fas fa-info-circle me-2"></i>{{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
 
                 <!-- Mensajes de error generales del formulario -->
                 {% if form.non_field_errors %}
