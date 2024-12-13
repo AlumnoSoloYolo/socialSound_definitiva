@@ -38,7 +38,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-INTERNAL_IPS = ['0.0.0.1']
+INTERNAL_IPS = ['0.0.0.0']
 
 
 
