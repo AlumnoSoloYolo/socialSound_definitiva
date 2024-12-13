@@ -11,7 +11,7 @@ urlpatterns = [
      path('seguir/<int:usuario_id>/', views.seguir_usuario, name='seguir_usuario'),
      path('dejar-de-seguir/<int:usuario_id>/', views.dejar_de_seguir_usuario, name='dejar_de_seguir_usuario'),
 
-     
+
      # path('perfil/<str:nombre_usuario>/album/crear/', views.crear_album, name='crear_album'),
      path('perfil/<str:nombre_usuario>/album/<int:album_id>/editar/', views.editar_album, name='editar_album'),
      path('album/busqueda-avanzada/', views.busqueda_avanzada_album, name='busqueda_avanzada_albumes'),
@@ -40,8 +40,8 @@ urlpatterns = [
 
 
     
-     path('usuarios-seguidos/', views.lista_seguidos, name='usuarios_seguidos'),
-     path('usuarios-seguidores/', views.lista_seguidores, name='usuarios_seguidores'),
+    path('usuarios/<str:nombre_usuario>/seguidores/', views.lista_seguidores, name='usuarios_seguidores'),
+path('usuarios/<str:nombre_usuario>/seguidos/', views.lista_seguidos, name='usuarios_seguidos'),
 
      path('', views.index, name='index'),  # Página de inicio con enlaces a todas las URLs
      path('mensajes_privados/<int:emisor_id>/<int:receptor_id>/', views.mensajes_privados, name='mensajes_privados'),

@@ -16,7 +16,7 @@
         margin-top: -24px; /* Elimina el espacio blanco */
         padding-top: 20px;
       }
-      <style>
+   
         .screen-container {
             position: relative;
             border-radius: 15px;
@@ -187,7 +187,17 @@
         a:hover .stat-card {
             text-decoration: none;
         }
-        </style>
+        
+        .no-albums-message {
+            padding: 3rem;
+            text-align: center;
+            width: 100%;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(10, 10, 10, 0.2);
+            border-radius: 10px;
+            margin: 1rem;
+        }
 
 </style>
 {% endblock %}
@@ -230,7 +240,7 @@
                             <!-- Cabecera con nombre y opciones -->
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h2 class="text-warning mb-0">{{ usuario.nombre_usuario }}</h2>
-                                {% if request.user == usuario %}
+                                {% if request.user.is_authenticated and request.user == usuario %}
                                     <div class="dropdown">
                                         <button class="btn btn-outline-warning" type="button" id="profileDropdown" data-bs-toggle="dropdown">
                                             <i class="fa-solid fa-gear"></i>
@@ -266,7 +276,7 @@
                                     </div>
                                 </div>
                                 <div class="col-12 col-sm-4">
-                                    <a href="{% url 'usuarios_seguidores' %}" class="text-decoration-none">
+                                    <a href="{% url 'usuarios_seguidores' usuario.nombre_usuario %}" class="text-decoration-none">
                                         <div class="stat-card">
                                             <div class="stat-content">
                                                 <h3 class="stat-number">{{ total_seguidores }}</h3>
@@ -276,7 +286,7 @@
                                     </a>
                                 </div>
                                 <div class="col-12 col-sm-4">
-                                    <a href="{% url 'usuarios_seguidos' %}" class="text-decoration-none">
+                                    <a href="{% url 'usuarios_seguidos' usuario.nombre_usuario %}" class="text-decoration-none">
                                         <div class="stat-card">
                                             <div class="stat-content">
                                                 <h3 class="stat-number">{{ total_seguidos }}</h3>
@@ -307,7 +317,7 @@
                                 <a href="{% url 'canciones_guardadas' usuario.nombre_usuario %}" class="btn btn-outline-warning">
                                     <i class="fa-solid fa-bookmark me-2"></i>Guardados
                                 </a>
-                                {% if usuario.id != request.user.id %}
+                                {% if request.user.is_authenticated and usuario.id != request.user.id %}
                                     <a href="{% url 'chat' usuario.id %}" class="btn btn-outline-warning">
                                         <i class="fab fa-rocketchat me-2"></i>Enviar mensaje
                                     </a>
@@ -319,30 +329,37 @@
             </div>
         </div>
     
-        <!-- Sección de Álbumes (fuera de la tarjeta de perfil) -->
-       
+          <!-- Sección de Álbumes con estructura mejorada -->
+          <div class="screen-container mb-4">
             <div class="chat-window">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <!-- Encabezado de álbumes -->
+                <div class="d-flex justify-content-between align-items-center p-4">
                     <h3 class="text-warning mb-0">Álbumes</h3>
-                    {% if user == usuario %}
+                    {% if request.user.is_authenticated and request.user == usuario %}
                         <a href="{% url 'crear_album' usuario.nombre_usuario %}" class="btn btn-warning">
                             <i class="fa-solid fa-plus me-2"></i>Nuevo álbum
                         </a>
                     {% endif %}
                 </div>
-                    <div class="row g-4 p-4">
-                        {% for album in albumes %}
-                            {% if request.user == usuario %}
+
+                <!-- Contenedor de álbumes con estructura consistente -->
+                <div class="album-container p-4">
+                    {% if albumes %}
+                        <div class="row g-4">
+                            {% for album in albumes %}
                                 {% include 'usuario/album_usuario.html' with album=album albums=albumes %}
-                            {% endif %}
-                        {% empty %}
-                            <div class="col-12 text-center text-white-50">
-                                No tienes álbumes subidos.
-                            </div>
-                        {% endfor %}
-                    </div>
-               
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-albums-message">
+                            <i class="fa-solid fa-music mb-3 d-block" style="font-size: 2rem;"></i>
+                            <p class="mb-0">No hay álbumes subidos.</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
+        </div>
+        
     </div>
 </div>
 {% endblock %}

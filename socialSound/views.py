@@ -1189,17 +1189,21 @@ def lista_no_sigue(request, nombre_usuario):
 
 
 
-def lista_seguidores(request):
-    usuario_actual = request.user
-    usuarios_seguidores = usuario_actual.obtener_seguidores()
-    return render(request, 'usuario/usuarios_seguidores.html', {'usuarios_seguidores': usuarios_seguidores})
+def lista_seguidores(request, nombre_usuario):
+    usuario = Usuario.objects.get(nombre_usuario=nombre_usuario)
+    usuarios_seguidores = usuario.obtener_seguidores()
+    return render(request, 'usuario/usuarios_seguidores.html', {
+        'usuarios_seguidores': usuarios_seguidores,
+        'usuario_perfil': usuario
+    })
 
-
-
-def lista_seguidos(request):
-    usuario_actual = request.user
-    usuarios_seguidos = usuario_actual.obtener_seguidos()
-    return render(request, 'usuario/usuarios_seguidos.html', {'usuarios_seguidos': usuarios_seguidos})
+def lista_seguidos(request, nombre_usuario):
+    usuario = Usuario.objects.get(nombre_usuario=nombre_usuario)
+    usuarios_seguidos = usuario.obtener_seguidos()
+    return render(request, 'usuario/usuarios_seguidos.html', {
+        'usuarios_seguidos': usuarios_seguidos,
+        'usuario_perfil': usuario
+    })
 
 #Vistas de error
 def mi_error_400(request,exception=None):
