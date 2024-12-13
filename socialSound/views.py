@@ -631,37 +631,53 @@ def eliminar_comentario(request, album_id, comentario_id):
 
 ## CRUD playlists
 @login_required
+def crear_playlist_usuario(form, usuario):
+   
+    try:
+        if form.is_valid():
+            # Crear la playlist sin guardar aún
+            playlist = form.save(commit=False)
+            playlist.usuario = usuario
+            playlist.save()
+            
+            # Guardar las canciones seleccionadas con su orden
+            canciones = form.cleaned_data.get('canciones', [])
+            for index, cancion in enumerate(canciones):
+                CancionPlaylist.objects.create(
+                    playlist=playlist,
+                    cancion=cancion,
+                    orden=index
+                )
+            
+            return True
+        return False
+    except Exception as e:
+        print(f"Error al crear playlist: {str(e)}")
+        return False
+
 def crear_playlist(request):
     datosFormulario = None
     if request.method == "POST":
         datosFormulario = request.POST
         
+    # Inicializar el formulario con los datos o None
     form = PlaylistForm(datosFormulario)
     
     if request.method == "POST":
+        # Intentar crear la playlist con las canciones seleccionadas
         playlist_creada = crear_playlist_usuario(form, request.user)
+        
         if playlist_creada:
             messages.success(request, 'Playlist creada exitosamente')
             return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
         else:
-            messages.error(request, 'Error al crear la playlist')
+            messages.error(request, 'Error al crear la playlist. Por favor verifica los datos ingresados.')
     
+    # Obtener todas las canciones disponibles para el contexto
     return render(request, 'CRUD_playlist/crear_playlist.html', {
         'form': form,
         'title': 'Crear Nueva Playlist'
     })
-
-def crear_playlist_usuario(form, usuario):
-    playlist_creada = False
-    if form.is_valid():
-        try:
-            playlist = form.save(commit=False)
-            playlist.usuario = usuario
-            playlist.save()
-            playlist_creada = True
-        except Exception as error:
-            print(error)
-    return playlist_creada
 
 @login_required
 def editar_playlist(request, playlist_id):

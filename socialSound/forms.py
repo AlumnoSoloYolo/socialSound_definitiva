@@ -148,7 +148,7 @@ class UsuarioUpdateForm(ModelForm):
             'foto_perfil': forms.FileInput(attrs={'class': 'form-control'})
         }
 
-def clean(self):
+    def clean(self):
         cleaned_data = super().clean()
 
         # Email
@@ -172,7 +172,6 @@ def clean(self):
     
 
 
-## revisar campo edad!!!
 class BusquedaAvanzadaUsuarioForm(forms.Form):
     nombre_usuario = forms.CharField(
         label='Nombre usuario',
@@ -617,12 +616,21 @@ class BusquedaAvanzadaComentarioForm(forms.Form):
         return self.cleaned_data
 
 
-
+# MIRAR!!!!!
 class PlaylistForm(ModelForm):
+
+    canciones = forms.ModelMultipleChoiceField(
+        queryset=Cancion.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'form-check-input me-1'
+        }),
+        help_text="Selecciona las canciones que deseas agregar a la playlist"
+    )
 
     class Meta:
         model = Playlist
-        fields = ['nombre', 'descripcion', 'publica']
+        fields = ['nombre', 'descripcion', 'publica', 'canciones']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -639,13 +647,11 @@ class PlaylistForm(ModelForm):
         }
 
     def clean(self):
-
         cleaned_data = super().clean()
-
         nombre = cleaned_data.get('nombre')
         descripcion = cleaned_data.get('descripcion')
+        canciones = cleaned_data.get('canciones')
         
-    
         if nombre and len(nombre) < 3:
             self.add_error('nombre', 'El nombre de la playlist debe tener al menos 3 caracteres.')
         
@@ -653,6 +659,22 @@ class PlaylistForm(ModelForm):
             self.add_error('descripcion', 'La descripción no puede tener más de 500 caracteres.')
 
         return cleaned_data
+
+    def save(self, commit=True):
+        playlist = super().save(commit=False)
+        if commit:
+            playlist.save()
+            # Guardamos las canciones seleccionadas
+            if self.cleaned_data.get('canciones'):
+                # Limpiamos las canciones existentes
+                playlist.canciones.clear()
+                # Agregamos las nuevas canciones seleccionadas
+                for i, cancion in enumerate(self.cleaned_data['canciones']):
+                    playlist.cancionplaylist_set.create(
+                        cancion=cancion,
+                        orden=i
+                    )
+        return playlist
 
 class BusquedaAvanzadaPlaylistForm(forms.Form):
     nombre = forms.CharField(

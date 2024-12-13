@@ -10,8 +10,6 @@ urlpatterns = [
      path('usuarios/busqueda-avanzada/', views.busqueda_avanzada_usuarios, name='busqueda_avanzada_usuarios'),
      path('seguir/<int:usuario_id>/', views.seguir_usuario, name='seguir_usuario'),
      path('dejar-de-seguir/<int:usuario_id>/', views.dejar_de_seguir_usuario, name='dejar_de_seguir_usuario'),
-
-
      # path('perfil/<str:nombre_usuario>/album/crear/', views.crear_album, name='crear_album'),
      path('perfil/<str:nombre_usuario>/album/<int:album_id>/editar/', views.editar_album, name='editar_album'),
      path('album/busqueda-avanzada/', views.busqueda_avanzada_album, name='busqueda_avanzada_albumes'),

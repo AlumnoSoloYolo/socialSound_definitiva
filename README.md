@@ -388,10 +388,221 @@ Son frecuentes en todo el proyecto, pero aquí especifico un ejemplo que muestra
 
 Estoy especificando ejemplos de los distintos filtros que he utilizado, los cuales repito en el proyecto sumando más de 10. 
       
-        
 
 Lo primero que tienes que hacer para probar los CRUDS es logearte. Una vez logueado te redirijirá a la página principal donde
 encontrarás distintas listas con todos los CRUDS.
+
+# CRUD USUARIO
+
+
+# CREATE - UsuarioModelForm
+
+    - Validación del Email
+    
+    Reglas
+
+    Campo obligatorio (no puede estar vacío)
+    Debe coincidir con el patrón de email: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+
+    Mensajes de Error
+
+    Si está vacío: "Este campo es requerido."
+    Si formato inválido: "Introduce un correo electrónico válido."
+
+    Ejemplos
+    usuario@dominio.com
+  
+    - Validación de nombre de usuario 
+
+    Reglas
+
+    Campo obligatorio (no puede estar vacío)
+    Solo permite letras, números y guiones bajos: ^[a-zA-Z0-9_]+$
+    Debe ser único en el sistema
+
+    Mensajes de Error
+
+    Si está vacío: "Este campo es requerido."
+    Si formato inválido: "El nombre de usuario solo puede contener letras, números y guiones bajos"
+    Si ya existe: "Nombre de usuario en uso"
+
+    Ejemplos
+    ✓ usuario123
+    ✗ usuario@123
+    ✗ usuario espacio
+    ✗ usuario#especial
+
+
+    - Validación de la Contraseña
+
+    Reglas
+
+    Campo obligatorio (no puede estar vacío)
+    Debe cumplir con el patrón: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$
+    
+    [Mínimo 8 caracteres
+    Al menos una mayúscula
+    Al menos una minúscula
+    Al menos un número
+    Al menos un carácter especial (@$!%*?&)]
+
+    Mensajes de Error
+
+    Si está vacío: "Este campo es requerido."
+    Si formato inválido: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)"
+
+    Ejemplos
+    Copy✓ Ejemplo1@
+    ✓ Password123$
+    ✗ password
+    ✗ Password
+    ✗ Password1
+    ✗ pass
+
+# UPDATE - UsuarioUpdateForm
+
+    - Validación del Email
+
+    Reglas
+
+    Campo obligatorio (no puede estar vacío)
+    Debe coincidir con el patrón: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+
+    Mensajes de Error
+
+    Si está vacío: "Este campo es requerido."
+    Si formato inválido: "Introduce un correo electrónico válido."
+
+    Ejemplos
+    ✓ usuario@dominio.com
+    ✓ nombre.apellido@empresa.es
+    ✗ usuario@
+    ✗ @dominio.com
+
+
+    - Validación del Nombre de Usuario
+
+    Reglas
+
+    Campo obligatorio (no puede estar vacío)
+    Solo permite letras, números y guiones bajos: ^[a-zA-Z0-9_]+$
+    Debe ser único en el sistema
+    Verifica si es el mismo usuario antes de validar unicidad
+
+    Mensajes de Error
+
+    Si está vacío: "Este campo es requerido."
+    Si formato inválido: "El nombre de usuario solo puede contener letras, números y guiones bajos"
+    Si ya existe: "Nombre de usuario en uso"
+
+    Ejemplos
+    ✓ usuario123
+    ✓ nombre_usuario
+    ✗ usuario@123
+    ✗ usuario espacio
+
+
+# READ - BusquedaavanzadaUsuarioForm
+
+    Reglas
+
+    Al menos un campo debe contener un valor
+    No se permiten todos los campos vacíos
+
+    Mensajes de Error
+
+    Si todos están vacíos: "Debes especificar al menos un criterio de búsqueda"
+
+    Ejemplos
+    ✓ Solo nombre_usuario con valor
+    ✓ Solo ciudad con valor
+    ✓ Cualquier combinación de campos
+    ✗ Todos los campos vacíos
+
+
+    - Validación de Edades
+    
+    Reglas
+
+    Rango permitido: 1-120 años
+    Si solo hay edad_min, edad_max = edad_min
+    Si solo hay edad_max, edad_min = edad_max
+    edad_min no puede ser mayor que edad_max
+    Se convierten automáticamente a fechas:
+
+    fecha_max = fecha_actual - edad_min
+    fecha_min = fecha_actual - (edad_max + 1)
+
+    Mensajes de Error
+
+    Si edad_min > edad_max: "La edad mínima no puede ser mayor que la edad máxima"
+
+    Ejemplos
+    ✓ edad_min: 18, edad_max: 25
+    ✓ edad_min: 30 (automáticamente edad_max = 30)
+    ✓ edad_max: 50 (automáticamente edad_min = 50)
+    ✗ edad_min: 40, edad_max: 30
+    ✗ edad_min: 150 (fuera de rango)
+
+
+
+# CRUD ALBUM
+
+
+# CREATE - AlbumModelForm
+
+    - Validación del Título
+    
+    Reglas
+
+    Campo obligatorio
+    Longitud máxima: 200 caracteres
+    Debe ser único en combinación con el artista
+
+    Mensajes de Error
+
+    Si está vacío: "El título es obligatorio"
+    Si excede longitud: "El título no puede exceder los 200 caracteres"
+    Si duplicado: "Ya existe un álbum con este título y artista"
+
+    Ejemplos
+    ✓ "Dark Side of the Moon"
+    ✓ "Abbey Road"
+    ✗ "" (vacío)
+    ✗ "Lorem ipsum..." (más de 200 caracteres)
+    ✗ Título duplicado del mismo artista
+
+
+    - Validación del Artista
+
+    Reglas
+
+    Campo obligatorio
+    Longitud máxima: 200 caracteres
+
+    Mensajes de Error
+
+    Si está vacío: "El artista es obligatorio"
+    Si excede longitud: "El nombre del artista no puede exceder los 200 caracteres"
+
+    Ejemplos
+    ✓ "Pink Floyd"
+    ✓ "The Beatles"
+    ✗ "" (vacío)
+    ✗ "Lorem ipsum..." (más de 200 caracteres)
+
+    Validación de Unicidad Compuesta
+
+    Reglas
+
+    La combinación título-artista debe ser única
+    Se excluye el álbum actual en actualizaciones
+    Se verifica en la base de datos
+
+# READ - BusquedaAvanzadaAlbumForm
+
+    
+
 
 
 
