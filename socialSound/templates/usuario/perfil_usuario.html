@@ -1,6 +1,7 @@
 {% extends 'principal.html' %}
 {% load static %}
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/fondo_estrella.css' %}">
 <style>
 
     .container{
@@ -15,207 +16,333 @@
         margin-top: -24px; /* Elimina el espacio blanco */
         padding-top: 20px;
       }
+      <style>
+        .screen-container {
+            position: relative;
+            border-radius: 15px;
+            padding: 3px;
+            background: linear-gradient(45deg, rgba(0,0,0,0.5), rgba(255,255,255,0.1));
+        }
+        
+        .screen-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 15px;
+            padding: 2px;
+            background: linear-gradient(45deg, #0ff, #f0f, #ff0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        
+        .chat-window {
+            background: rgba(10, 10, 10, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Estilos específicos para la imagen de perfil */
+        .profile-image-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: auto;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Estilos para las estadísticas */
+        .stat-card {
+            background: rgba(10, 10, 10, 0.4);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 193, 7, 0.5);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.2);
+        }
+        
+        /* Estilos para los botones */
+        .btn {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-warning {
+            background: rgba(255, 193, 7, 0.9);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+        }
+        
+        .btn-outline-warning {
+            border: 1px solid rgba(255, 193, 7, 0.5);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+        }
+        
+        /* Estilos para el dropdown */
+        .dropdown-menu {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dropdown-item {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        
+        /* Efecto de líneas */
+        .chat-window::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1) 0px,
+                rgba(0, 0, 0, 0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        
+        .stat-card {
+            background: rgba(10, 10, 10, 0.4);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+            border-radius: 15px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 193, 7, 0.5);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.2);
+        }
+        
+        .stat-content {
+            text-align: center;
+        }
+        
+        .stat-number {
+            color: #ffffff;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+        
+        .stat-label {
+            color: #ffc107;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Estilos para los enlaces de estadísticas */
+        a .stat-card .stat-number,
+        a .stat-card .stat-content,
+        a .stat-card h3 {
+            color: #ffffff !important;
+        }
+        
+        a:hover .stat-card {
+            text-decoration: none;
+        }
+        </style>
 
-.stars {
-    position: fixed;
-    top: 60px; /* Ajusta este valor a la altura de tu header */
-    left: 0;
-    width: 100%;
-    height: calc(100vh - 60px); /* Ajusta para que no cubra el header */
-    pointer-events: none;
- }
-
-.stars::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
-        radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
-        radial-gradient(2px 2px at 50px 160px, #ffffff, transparent),
-        radial-gradient(2px 2px at 90px 40px, #ffffff, transparent),
-        radial-gradient(2px 2px at 130px 80px, #ffffff, transparent),
-        radial-gradient(2px 2px at 160px 120px, #ffffff, transparent);
-    background-repeat: repeat;
-    background-size: 200px 200px;
-    animation: twinkle 5s linear infinite;
-
-}
-
-@keyframes twinkle {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-200px); }
-}
 </style>
 {% endblock %}
 
 {% block contenido %}
 <div class="container-busqueda">
-
-    {% comment %} {% if messages %}
-    {% for message in messages %}
-        {% if message.tags == "success" %}
-            <div class="alert alert-success mt-6 alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% elif message.tags == "error" %}
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endif %}
-    {% endfor %}
-{% endif %} {% endcomment %}
-
-       
-<div class="container py-5">
-    <div class="stars"></div>
-    <!-- Cabecera del perfil -->
-    <div class="card border-0 shadow-lg bg-dark text-white mb-5">
-        <div class="card-body p-4">
-            <div class="row align-items-center">
-                <!-- Columna de la imagen -->
-                <div class="col-lg-3 text-center">
-                    {% if usuario.foto_perfil %}
-                        <img src="{{ usuario.foto_perfil.url }}" 
-                             alt="Foto de perfil de {{ usuario.nombre_usuario }}"
-                             class="rounded-circle img-thumbnail"
-                             style="width: 200px; height: 200px; object-fit: cover; border: 5px solid #ffc107;">
-                    {% else %}
-                        <img src="{% static 'default_profile_image.jpg' %}" 
-                             alt="Foto por defecto"
-                             class="rounded-circle img-thumbnail"
-                             style="width: 200px; height: 200px; object-fit: cover; border: 5px solid #ffc107;">
-                    {% endif %}
-                </div>
-
-                <!-- Columna de información -->
-                <div class="col-lg-9">
-                    {% if 'login' in message.tags %}
-                                    <div class="alert alert-success alert-{{ message.tags }} success-message mb-4">
-                                        <i class="fas fa-check-circle me-2"></i>
-                                        {{ message }}
+    <div class="container py-5">
+        <div class="stars"></div>
+        
+        <!-- Tarjeta de Perfil -->
+        <div class="screen-container profile-card mb-5">
+            <div class="chat-window">
+                <div class="profile-content p-4">
+                    <div class="row align-items-center">
+                        <!-- Imagen de perfil -->
+                        <div class="col-lg-3">
+                            <div class="profile-image-container mx-auto">
+                                {% if usuario.foto_perfil %}
+                                    <img src="{{ usuario.foto_perfil.url }}" 
+                                         alt="Foto de perfil de {{ usuario.nombre_usuario }}"
+                                         class="profile-image">
+                                {% else %}
+                                    <img src="{% static 'default_profile_image.jpg' %}" 
+                                         alt="Foto por defecto"
+                                         class="profile-image">
+                                {% endif %}
+                            </div>
+                        </div>
+    
+                        <!-- Información del perfil -->
+                        <div class="col-lg-9">
+                            <!-- Mensajes de alerta -->
+                            {% if 'login' in message.tags %}
+                                <div class="alert alert-success alert-{{ message.tags }} success-message mb-4">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+    
+                            <!-- Cabecera con nombre y opciones -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h2 class="text-warning mb-0">{{ usuario.nombre_usuario }}</h2>
+                                {% if request.user == usuario %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-warning" type="button" id="profileDropdown" data-bs-toggle="dropdown">
+                                            <i class="fa-solid fa-gear"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'actualizar_perfil' usuario.nombre_usuario %}">
+                                                    <i class="fa-solid fa-wrench me-2"></i>Editar perfil
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form action="{% url 'eliminar_usuario' usuario.nombre_usuario %}" method="post" id="deleteForm">
+                                                    {% csrf_token %}
+                                                    <button class="dropdown-item text-danger" type="submit" onclick="return confirm('¿Estás seguro? Esta acción no se puede deshacer.');">
+                                                        <i class="fa-solid fa-trash me-2"></i>Eliminar cuenta
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
                                     </div>
                                 {% endif %}
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 class="mb-0">{{ usuario.nombre_usuario }}</h2>
-                        {% if request.user == usuario %}
-                            <div class="dropdown">
-                                <button class="btn btn-outline-warning" type="button" id="profileDropdown" data-bs-toggle="dropdown">
-                                    <i class="fa-solid fa-gear"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'actualizar_perfil' usuario.nombre_usuario %}">
-                                            <i class="fa-solid fa-wrench me-2"></i>Editar perfil
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form action="{% url 'eliminar_usuario' usuario.nombre_usuario %}" method="post" id="deleteForm">
-                                            {% csrf_token %}
-                                            <button class="dropdown-item text-danger" type="submit" onclick="return confirm('¿Estás seguro? Esta acción no se puede deshacer.');">
-                                                <i class="fa-solid fa-trash me-2"></i>Eliminar cuenta
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
                             </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Estadísticas en tarjetas modernas -->
-                    <div class="row text-center mb-4">
-                        <div class="col-12 col-sm-4">
-                            <div class="stat-card bg-warning bg-opacity-10 p-3 rounded">
-                                <h3 class="mb-1">{{ total_albumes }}</h3>
-                                <span class="text-warning">Publicaciones</span>
+    
+                            <!-- Estadísticas -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-sm-4">
+                                    <div class="stat-card">
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ total_albumes }}</h3>
+                                            <span class="stat-label">Publicaciones</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <a href="{% url 'usuarios_seguidores' %}" class="text-decoration-none">
+                                        <div class="stat-card">
+                                            <div class="stat-content">
+                                                <h3 class="stat-number">{{ total_seguidores }}</h3>
+                                                <span class="stat-label">Seguidores</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <a href="{% url 'usuarios_seguidos' %}" class="text-decoration-none">
+                                        <div class="stat-card">
+                                            <div class="stat-content">
+                                                <h3 class="stat-number">{{ total_seguidos }}</h3>
+                                                <span class="stat-label">Seguidos</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+    
+                            <!-- Bio y ubicación -->
+                            <div class="mb-4">
+                                {% if usuario.bio %}
+                                    <p class="mb-2 text-white-50">{{ usuario.bio }}</p>
+                                {% endif %}
+                                {% if usuario.ciudad %}
+                                    <p class="text-warning mb-0">
+                                        <i class="fa-solid fa-location-dot me-2"></i>{{ usuario.ciudad }}
+                                    </p>
+                                {% endif %}
+                            </div>
+    
+                            <!-- Botones de acción -->
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'lista_playlist' usuario.nombre_usuario %}" class="btn btn-warning">
+                                    <i class="fa-solid fa-music me-2"></i>Playlists
+                                </a>
+                                <a href="{% url 'canciones_guardadas' usuario.nombre_usuario %}" class="btn btn-outline-warning">
+                                    <i class="fa-solid fa-bookmark me-2"></i>Guardados
+                                </a>
+                                {% if usuario.id != request.user.id %}
+                                    <a href="{% url 'chat' usuario.id %}" class="btn btn-outline-warning">
+                                        <i class="fab fa-rocketchat me-2"></i>Enviar mensaje
+                                    </a>
+                                {% endif %}
                             </div>
                         </div>
-                        <div class="col-12 col-sm-4">
-                            <a href="{% url 'usuarios_seguidores' %}" class="text-decoration-none" style="color: inherit">
-                                <div class="stat-card bg-warning bg-opacity-10 p-3 rounded">
-                                    <h3 class="mb-1">{{ total_seguidores }}</h3>
-                                    <span class="text-warning">Seguidores</span>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-12 col-sm-4">
-                            <a href="{% url 'usuarios_seguidos' %}" class="text-decoration-none" style="color: inherit">
-                                <div class="stat-card bg-warning bg-opacity-10 p-3 rounded">
-                                    <h3 class="mb-1">{{ total_seguidos }}</h3>
-                                    <span class="text-warning">Seguidos</span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Bio y ubicación -->
-                    <div class="mb-3">
-                        {% if usuario.bio %}
-                            <p class="mb-2">{{ usuario.bio }}</p>
-                        {% endif %}
-                        {% if usuario.ciudad %}
-                            <p class="text-warning mb-0">
-                                <i class="fa-solid fa-location-dot me-2"></i>{{ usuario.ciudad }}
-                            </p>
-                        {% endif %}
-                    </div>
-
-                    <!-- Botones de acción -->
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'lista_playlist' usuario.nombre_usuario %}" class="btn btn-warning">
-                            <i class="fa-solid fa-music me-2"></i>Playlists
-                        </a>
-                        <a href="{% url 'canciones_guardadas' usuario.nombre_usuario %}" class="btn btn-outline-warning">
-                            <i class="fa-solid fa-bookmark me-2"></i>Guardados
-                        </a>
-                        {%if usuario.id != request.user.id%}
-                        <a href="{% url 'chat' usuario.id %}" class="btn btn-outline-warning">
-                            <i class="fab fa-rocketchat"></i> enviar mensaje
-                        </a>
-                        {%endif%}
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Sección de álbumes -->
-    <div class="albums-section">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="mb-0 text-warning">Álbumes</h3>
-            {% if user == usuario %}
-                <a href="{% url 'crear_album' usuario.nombre_usuario %}" class="btn btn-warning">
-                    <i class="fa-solid fa-plus me-2"></i>Nuevo álbum
-                </a>
-            {% endif %}
-        </div>
-
-        <div class="row g-4">
-            {% for album in albumes %}
-                {% include 'usuario/album_usuario.html' with album=album %}
-            {% empty %}
-                <div class="col-12">
-
-                    {% if user == usuario%}
-                    <div class="alert alert-warning text-center">
-                        <i class="fa-solid fa-compact-disc me-2"></i>
-                        No tienes albumes subidos.
-                    </div>
-                    {% else %}
-                    <div class="alert alert-warning text-center">
-                        <i class="fa-solid fa-compact-disc me-2"></i>
-                        No hay álbumes subidos por este usuario.
-                    </div>
+    
+        <!-- Sección de Álbumes (fuera de la tarjeta de perfil) -->
+       
+            <div class="chat-window">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="text-warning mb-0">Álbumes</h3>
+                    {% if user == usuario %}
+                        <a href="{% url 'crear_album' usuario.nombre_usuario %}" class="btn btn-warning">
+                            <i class="fa-solid fa-plus me-2"></i>Nuevo álbum
+                        </a>
                     {% endif %}
                 </div>
-            {% endfor %}
-        </div>
+                    <div class="row g-4 p-4">
+                        {% for album in albumes %}
+                            {% if request.user == usuario %}
+                                {% include 'usuario/album_usuario.html' with album=album albums=albumes %}
+                            {% endif %}
+                        {% empty %}
+                            <div class="col-12 text-center text-white-50">
+                                No tienes álbumes subidos.
+                            </div>
+                        {% endfor %}
+                    </div>
+               
+            </div>
     </div>
-</div>
-</div>
 </div>
 {% endblock %}

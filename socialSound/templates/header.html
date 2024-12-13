@@ -38,17 +38,18 @@
                         </a>
                     </li>
 
+                
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'feed'  %}">
-                            <i class="fa-solid fa-satellite-dish nav-icon"></i>
-                            <span class="nav-tooltip">Feed</span>
+                        <a class="nav-link" href="{% url 'busqueda_avanzada_playlists' %}">
+                            <i class="fa-solid fa-newspaper nav-icon"></i>
+                            <span class="nav-tooltip">Buscar playlists</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'lista_playlist' request.user.nombre_usuario %}">
-                            <i class="fa-solid fa-newspaper nav-icon"></i>
-                            <span class="nav-tooltip">Mis playlists</span>
+                        <a class="nav-link" href="{% url 'feed'  %}">
+                            <i class="fa-solid fa-satellite-dish nav-icon"></i>
+                            <span class="nav-tooltip">Feed</span>
                         </a>
                     </li>
 

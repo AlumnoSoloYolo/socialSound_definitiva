@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from datetime import timedelta
 
 
 
@@ -204,6 +205,17 @@ class Cancion(models.Model):
 
     def __str__(self):
         return self.titulo
+    
+    def obtener_duracion(self):
+        try:
+            if self.archivo_audio:
+                audio = File(self.archivo_audio.path)
+                if audio is not None:
+                    duracion_segundos = float(audio.info.length)
+                    return timedelta(seconds=int(duracion_segundos))
+        except Exception as e:
+            print(f"Error al obtener duración: {str(e)}")
+        return timedelta()
 
 
 # Modelo Detalle de Cancion (OneToOne)
@@ -211,11 +223,18 @@ class DetallesCancion(models.Model):
     cancion = models.OneToOneField(Cancion, on_delete=models.CASCADE, related_name='detalles')
     letra = models.TextField(blank=True)
     creditos = models.TextField(blank=True)
-    duracion = models.DurationField()
+    duracion = models.DurationField(default=timedelta)
     idioma = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return f'Detalles de {self.cancion.titulo}'
+    
+    @property
+    def duracion_formateada(self):
+        total_segundos = int(self.duracion.total_seconds())
+        minutos = total_segundos // 60
+        segundos = total_segundos % 60
+        return f"{minutos:02d}:{segundos:02d}"
 
 
 # Modelo de Playlist con relación ManyToMany a Cancion

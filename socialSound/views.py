@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Sum, Q, Prefetch, Count
 from .models import Usuario, Album, Cancion, Playlist, CancionPlaylist, Guardado, MensajePrivado, Comentario, EstadisticasAlbum, DetalleAlbum
 from django.views.defaults import page_not_found
-from .forms import UsuarioModelForm, LoginForm, BusquedaAvanzadaUsuarioForm, AlbumModelForm, DetalleAlbumModelForm, BusquedaAvanzadaAlbumForm, ComentarioModelForm, BusquedaAvanzadaComentarioForm, CancionForm, DetallesCancionForm, BusquedaAvanzadaCancionForm, PlaylistForm, MensajePrivadoForm, BusquedaMensajesForm, UsuarioUpdateForm
+from .forms import UsuarioModelForm, LoginForm, BusquedaAvanzadaUsuarioForm, AlbumModelForm, DetalleAlbumModelForm, BusquedaAvanzadaAlbumForm, ComentarioModelForm, BusquedaAvanzadaComentarioForm, CancionForm, DetallesCancionForm, BusquedaAvanzadaCancionForm, PlaylistForm, MensajePrivadoForm, BusquedaMensajesForm, UsuarioUpdateForm, BusquedaAvanzadaPlaylistForm
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from dateutil.relativedelta import relativedelta
@@ -72,7 +72,7 @@ def login_usuario(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Bienvenido {user.nombre_usuario}', extra_tags='login')
-                return redirect('perfil_usuario', nombre_usuario=user.nombre_usuario)
+                return redirect('index')
             else:
                 messages.error(request, 'Credenciales inválidas', extra_tags='error_credencialess') 
     else:
@@ -307,8 +307,8 @@ def eliminar_album(request, album_id):
             nombre_album = album.titulo
             album.delete()
             messages.success(request, f'El álbum "{nombre_album}" ha sido eliminado correctamente.')
-    except Exception as e:
-        messages.error(request, 'Hubo un error al eliminar el álbum. Por favor, inténtalo de nuevo.')
+    except:
+        pass
     
     return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
 
@@ -358,6 +358,7 @@ def crear_album_con_canciones(request, nombre_usuario):
 
                             detalles = detalles_form.save(commit=False)
                             detalles.cancion = cancion
+                            detalles.duracion = cancion.obtener_duracion()
                             detalles.save()
 
                 messages.success(request, 'Álbum y canciones creados exitosamente')
@@ -386,31 +387,39 @@ def crear_album_con_canciones(request, nombre_usuario):
 
 @login_required
 def editar_cancion(request, cancion_id):
-
-    cancion = Cancion.objects.get(id=cancion_id)
-    detalles = cancion.detalles
-  
-
-    if request.method == 'POST':
-        cancion_form = CancionForm(request.POST, request.FILES, instance=cancion)
+    try:
+        cancion = Cancion.objects.get(id=cancion_id)
+        detalles = cancion.detalles
+    except Cancion.DoesNotExist:
+        messages.error(request, 'La canción no existe')
+        return redirect('home') 
+        
+    datosCancion = None
+    datosDetalles = None
     
-        detalles_form = DetallesCancionForm(request.POST, instance=detalles)
+    if request.method == "POST":
+        datosCancion = request.POST
+        datosDetalles = request.POST
+        
+    cancion_form = CancionForm(datosCancion, request.FILES if request.method == "POST" else None, instance=cancion)
+    detalles_form = DetallesCancionForm(datosDetalles, instance=detalles)
     
+    if request.method == "POST":
         if cancion_form.is_valid() and detalles_form.is_valid():
-            cancion = cancion_form.save()
-            detalles = detalles_form.save(commit=False)
-            detalles.cancion = cancion
-            detalles.save()
-
-            messages.success(request, 'Cancion actualizada con éxito')
-            return redirect('canciones_album', album_id=cancion.album.id)
-
+            try:
+                cancion = cancion_form.save()
+                detalles = detalles_form.save(commit=False)
+                detalles.cancion = cancion
+                detalles.save()
+                
+                messages.success(request, f'Se ha editado la canción {cancion.titulo} correctamente')
+                return redirect('canciones_album', album_id=cancion.album.id)
+                
+            except Exception as error:
+                print(error)  
+                messages.error(request, 'Ha ocurrido un error al guardar la canción')
         else:
             messages.error(request, 'Por favor, corrija los errores en el formulario')
-    else:
-        cancion_form = CancionForm(instance=cancion)
-        detalles_form = DetallesCancionForm(instance=detalles)
-
     
     return render(request, 'CRUD_cancion/editar_cancion.html', {
         'cancion_form': cancion_form,
@@ -421,11 +430,13 @@ def editar_cancion(request, cancion_id):
 
 def eliminar_cancion(request, cancion_id):
     cancion = Cancion.objects.get(id=cancion_id)
-
     album_id = cancion.album.id
+    try:
+        cancion.delete()
+        messages.success(request, 'Canción eliminada con éxito')
+    except:
+        pass
 
-    cancion.delete()
-    messages.success(request, 'Canción eliminada con éxito')
     return redirect('canciones_album', album_id=album_id)
 
 
@@ -512,7 +523,7 @@ def crear_comentario(request, album_id):
 
     comentarios = Comentario.objects.filter(album=album).order_by('-fecha_publicacion')
     
-    return render(request, 'CRUD_comentario/crear_comentario.html', {
+    return render(request, 'album/comentarios_album.html', {
         'form': form,
         'album': album,
         'comentarios': comentarios
@@ -534,27 +545,39 @@ def crear_comentario_album(form, usuario, album):
 
 @login_required
 def actualizar_comentario(request, album_id, comentario_id):
-    album = Album.objects.get(id=album_id)
+    try:
+        album = Album.objects.get(id=album_id)
+        comentario = Comentario.objects.get(id=comentario_id, usuario=request.user)
+    except Album.DoesNotExist:
+        messages.error(request, 'El álbum no existe')
+        return redirect('home') 
+   
+    
+    datosFormulario = None
+    
+    if request.method == "POST":
+        datosFormulario = request.POST
+    
+    formulario = ComentarioModelForm(datosFormulario, instance=comentario)
+    
+    if request.method == "POST":
+        if formulario.is_valid():
+            try:
+                formulario.save()
+                messages.success(request, 'Se ha actualizado el comentario correctamente')
+                return redirect('comentarios_album', album_id=album.id)
+            except Exception as error:
+                print(error)  
+                messages.error(request, 'Ha ocurrido un error al actualizar el comentario')
+        else:
+            messages.error(request, 'Por favor, corrija los errores en el formulario')
 
-    comentario = Comentario.objects.get(id=comentario_id, usuario=request.user)
-
-    if request.method == 'POST':
-        form = ComentarioModelForm(request.POST, instance=comentario)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Comentario actualizado')
-            return redirect('comentarios_album', album_id=album.id)
-    else:
-        form = ComentarioModelForm(instance=comentario)
-
-    context = {
-        'form': form,
+    return render(request, 'CRUD_comentario/editar_comentario.html',  {
+        'form': formulario,
         'album': album,
         'comentario': comentario,
         'is_update': True
-    }
-
-    return render(request, 'CRUD_comentario/editar_comentario.html', context)
+    })
     
 
 def busqueda_avanzada_comentarios(request, album_id):
@@ -599,7 +622,10 @@ def busqueda_avanzada_comentarios(request, album_id):
 def eliminar_comentario(request, album_id, comentario_id):
     comentario = Comentario.objects.get(id=comentario_id, album_id=album_id)
     if request.user == comentario.usuario:
-        comentario.delete()
+        try:
+           comentario.delete()
+        except:
+            pass
     return redirect('comentarios_album', album_id=album_id)
 
 
@@ -639,20 +665,62 @@ def crear_playlist_usuario(form, usuario):
 
 @login_required
 def editar_playlist(request, playlist_id):
-    playlist = Playlist.objects.get(id=playlist_id, usuario=request.user)
-
-    if request.method == 'POST':
-        form = PlaylistForm(request.POST, instance=playlist)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Playlist actualizada exitosamente')
-            return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
-    else:
-        form = PlaylistForm(instance=playlist)
+    try:
+        playlist = Playlist.objects.get(id=playlist_id, usuario=request.user)
+    except Playlist.DoesNotExist:
+        messages.error(request, 'La playlist no existe o no tienes permiso para editarla')
+        return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
+    
+    datosFormulario = None
+    
+    if request.method == "POST":
+        datosFormulario = request.POST
+    
+    formulario = PlaylistForm(datosFormulario, instance=playlist)
+    
+    if request.method == "POST":
+        if formulario.is_valid():
+            try:
+                formulario.save()
+                messages.success(request, f'Se ha editado la playlist {formulario.cleaned_data.get("nombre")} correctamente')
+                return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
+            except Exception as error:
+                print(error) 
+                messages.error(request, 'Ha ocurrido un error al actualizar la playlist')
+        else:
+            messages.error(request, 'Por favor, corrija los errores en el formulario')
 
     return render(request, 'CRUD_playlist/editar_playlist.html', {
-        'form': form,
+        'form': formulario,
         'title': 'Editar Playlist'
+    })
+
+@login_required
+def busqueda_avanzada_playlists(request):
+    form = BusquedaAvanzadaPlaylistForm(request.GET or None)
+    
+    playlists = Playlist.objects.all()
+    
+    if form.is_valid():
+        if nombre := form.cleaned_data.get('nombre'):
+            playlists = playlists.filter(nombre__icontains=nombre)
+        
+        if usuario := form.cleaned_data.get('usuario'):
+            playlists = playlists.filter(usuario__nombre_usuario__icontains=usuario)
+            
+        if fecha_desde := form.cleaned_data.get('fecha_desde'):
+            playlists = playlists.filter(fecha_creacion__gte=fecha_desde)
+            
+        if fecha_hasta := form.cleaned_data.get('fecha_hasta'):
+            playlists = playlists.filter(fecha_creacion__lte=fecha_hasta)
+            
+        if (publica := form.cleaned_data.get('publica')) in ['True', 'False']:
+            playlists = playlists.filter(publica=publica == 'True')
+    
+    return render(request, 'CRUD_playlist/busqueda_avanzada_playlists.html', {
+        'form': form,
+        'playlists': playlists,
+        'title': 'Búsqueda Avanzada de Playlists'
     })
 
 
@@ -677,13 +745,13 @@ def agregar_cancion_playlist(request, playlist_id):
         form_busqueda = BusquedaAvanzadaCancionForm()
         canciones = Cancion.objects.all()
     
-    return render(request, 'playlist/agregar_cancion.html', {
+    return render(request, 'CRUD_playlist/agregar_cancion.html', {
         'playlist': playlist,
         'canciones': canciones,
         'form_busqueda': form_busqueda,
     })
 
-
+@login_required
 def crear_mensaje_privado(request, usuario_id):
     try:
         otro_usuario = Usuario.objects.get(id=usuario_id)
@@ -696,14 +764,18 @@ def crear_mensaje_privado(request, usuario_id):
         if request.method == "POST":
             datosFormulario = request.POST
             
-        form = MensajePrivadoForm(datosFormulario)
+        form = MensajePrivadoForm(datosFormulario, user=request.user)
         
         if request.method == "POST" and 'enviar_mensaje' in request.POST:
-            mensaje_creado = crear_mensaje(form, request.user, otro_usuario)
-            if mensaje_creado:
-                messages.success(request, "Mensaje enviado correctamente")
-                return redirect('chat', usuario_id=usuario_id)
-            else:
+            try:
+                mensaje_creado = crear_mensaje(form, request.user, otro_usuario)
+                if mensaje_creado:
+                    messages.success(request, "Mensaje enviado correctamente")
+                    return redirect('chat', usuario_id=usuario_id)
+                else:
+                    messages.error(request, "Por favor, corrija los errores en el formulario")
+            except Exception as error:
+                print(error)  
                 messages.error(request, "Error al enviar el mensaje")
 
         return render(request, 'CRUD_mensajePrivado/crear_chat.html', {
@@ -711,22 +783,23 @@ def crear_mensaje_privado(request, usuario_id):
             'otro_usuario': otro_usuario,
             'form': form
         })
-    except ObjectDoesNotExist:
+    except Usuario.DoesNotExist:
         messages.error(request, "El usuario no existe")
         return redirect('home')
 
+@login_required
 def crear_mensaje(form, emisor, receptor):
-    mensaje_creado = False
     if form.is_valid():
         try:
             mensaje = form.save(commit=False)
             mensaje.emisor = emisor
             mensaje.receptor = receptor
             mensaje.save()
-            mensaje_creado = True
+            return True
         except Exception as error:
-            print(error)
-    return mensaje_creado 
+            print(error)  
+            return False
+    return False
 
 
 ## busqued avanzada de mensajes que he implementado en el template de listas de chats
@@ -740,7 +813,7 @@ def lista_chats(request):
     ).distinct()
 
     if form.is_valid():
-        # Aplicar filtros solo si el formulario es válido
+
         if form.cleaned_data.get('contenido'):
             usuarios = usuarios.filter(
                 Q(emisor__contenido__icontains=form.cleaned_data['contenido']) |
@@ -784,44 +857,69 @@ def lista_chats(request):
         'usuarios': usuarios,
     })
 
+
 @login_required
 def editar_mensaje(request, mensaje_id):
   
     mensaje = MensajePrivado.objects.get(id=mensaje_id)
- 
 
+    datosFormulario = None
     
-    if request.method == 'POST':
-        form = MensajePrivadoForm(request.POST, instance=mensaje)
-        if form.is_valid():
-            form.save()
-         
-            messages.success(request, "Mensaje actualizado correctamente")
-            return redirect('chat', usuario_id=mensaje.receptor.id)
-    else:
-        form = MensajePrivadoForm(instance=mensaje)
+    if request.method == "POST":
+        datosFormulario = request.POST
     
+    formulario = MensajePrivadoForm(datosFormulario, instance=mensaje)
+    
+    if request.method == "POST":
+        if formulario.is_valid():
+            try:
+                formulario.save()
+                messages.success(request, 'Se ha editado el mensaje correctamente')
+                return redirect('chat', usuario_id=mensaje.receptor.id)
+            except Exception as error:
+                print(error) 
+                messages.error(request, 'Ha ocurrido un error al actualizar el mensaje')
+        else:
+            messages.error(request, 'Por favor, corrija los errores en el formulario')
+    
+
     return render(request, 'CRUD_mensajePrivado/editar_mensaje.html', {
-        'form': form,
+        'form': formulario,
         'mensaje': mensaje,
-       
     })
 
 @login_required
 def eliminar_mensaje(request, mensaje_id):
     mensaje = MensajePrivado.objects.get(id=mensaje_id)
+    receptor_id = mensaje.receptor.id
+
     if request.user == mensaje.emisor:
-        receptor_id = mensaje.receptor.id
-        mensaje.delete()
-        messages.success(request, "Mensaje eliminado correctamente")
-        return redirect('chat', usuario_id=receptor_id)
+        try:
+            mensaje.delete()
+            messages.success(request, "Se ha eliminado el mensaje correctamente")
+        except:
+            pass
+            
+       
+    
+    return redirect('chat', usuario_id=mensaje.receptor.id)
+
+
+
+@login_required
+def eliminar_playlist(request, playlist_id):
+    playlist = Playlist.objects.get(id=playlist_id)
+   
+    try:
+        playlist.delete()
+        messages.success(request, "Se ha eliminado la playlist correctamente")
+    except:
+        pass
+            
+       
     else:
-        messages.error(request, "No tienes permiso para eliminar este mensaje")
-        return redirect('chat', usuario_id=mensaje.receptor.id)
-
-
-
-
+        
+        return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
 
 
 
@@ -866,6 +964,7 @@ def eliminar_mensaje(request, mensaje_id):
 
 
 # 1. Página de inicio con enlaces a todas las URLs
+@login_required
 def index(request):
     # Renderiza la plantilla principal con enlaces a las demás páginas de la aplicación
     return render(request, "index.html")

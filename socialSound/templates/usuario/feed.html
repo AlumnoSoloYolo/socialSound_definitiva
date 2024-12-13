@@ -18,70 +18,7 @@
         <div class="row">
             {% if albums %}
                 {% for album in albums %}
-                <div class="col-md-12 mb-3">
-                    <div class="card" style="background-color: rgba(255, 255, 255, 0.6)">
-                        <div class="row g-0">
-                            <!-- Portada del álbum (lado izquierdo) -->
-                            <div class="col-md-4">
-                                {% if album.portada %}
-                                    <img src="{{ album.portada.url }}" class="img-fluid rounded-start" style="height: 100%; object-fit: cover;" alt="{{ album.titulo }}">
-                                {% else %}
-                                    <img src="{% static 'images/default-album.jpg' %}" class="img-fluid rounded-start" style="height: 100%; object-fit: cover;" alt="Portada por defecto">
-                                {% endif %}
-                            </div>
-                            <!-- Información del álbum (lado derecho) -->
-                            <div class="col-md-8">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ album.titulo }}</h5>
-                                    <p class="card-text">
-                                        <strong>Artista:</strong> {{ album.artista }}<br>
-                                        <strong>Subido por:</strong> 
-                                        <a href="{% url 'perfil_usuario' album.usuario.nombre_usuario %}" class="text-decoration-none">
-                                            {{ album.usuario.nombre_usuario }}
-                                        </a><br>
-                                        <strong>Fecha de subida:</strong> {{ album.fecha_subida|date:"d/m/Y" }}
-                                    </p>
-                                    {% if album.descripcion %}
-                                        <p class="card-text">{{ album.descripcion }}</p>
-                                    {% endif %}
-                                    
-                                    <!-- Detalles del álbum si existen -->
-                                    {% if album.detalle_album %}
-                                        <div class="mt-2">
-                                            <h6>Detalles del álbum:</h6>
-                                            <p class="card-text">
-                                                <small class="text-muted">
-                                                    {% if album.detalle_album.productor %}
-                                                        <strong>Productor:</strong> {{ album.detalle_album.productor }}<br>
-                                                    {% endif %}
-                                                    {% if album.detalle_album.estudio_grabacion %}
-                                                        <strong>Estudio:</strong> {{ album.detalle_album.estudio_grabacion }}<br>
-                                                    {% endif %}
-                                                    {% if album.detalle_album.sello_discografico %}
-                                                        <strong>Sello:</strong> {{ album.detalle_album.sello_discografico }}<br>
-                                                    {% endif %}
-                                                    <strong>Número de pistas:</strong> {{ album.detalle_album.numero_pistas }}
-                                                </small>
-                                            </p>
-                                        </div>
-                                    {% endif %}
-                                    
-                                    <!-- Botones de acción -->
-                                    <div class="mt-3">
-                                        <div class="btn-group">
-                                            <a href="{% url 'canciones_album' album.id %}" class="btn btn-warning">
-                                                <i class="bi bi-music-note-list"></i> Ver canciones
-                                            </a>
-                                            <a href="{% url 'comentarios_album' album.id %}" class="btn btn-warning">
-                                                <i class="bi bi-chat"></i> Ver comentarios
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {% include 'usuario/album_usuario.html' %}
                 {% endfor %}
             {% else %}
                 <div class="col-md-12">

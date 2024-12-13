@@ -5,7 +5,7 @@
             {% for comentario in comentarios %}
                 <div class="comment-card mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
                     <div class="d-flex justify-content-between align-items-start">
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 text-white">
                             {% if comentario.usuario.foto_perfil %}
                                 <img src="{{ comentario.usuario.foto_perfil.url }}" 
                                      class="rounded-circle" 
@@ -18,8 +18,8 @@
                                 </div>
                             {% endif %}
                             <div>
-                                <h6 class="mb-1">{{ comentario.usuario.nombre_usuario }}</h6>
-                                <p class="text-muted small mb-2">
+                                <h6 class="mb-1 text-white">{{ comentario.usuario.nombre_usuario }}</h6>
+                                <p class="text-white small mb-2">
                                     <i class="far fa-clock"></i> 
                                     {{ comentario.fecha_publicacion|date:"d/m/Y H:i" }}
                                 </p>
@@ -44,7 +44,7 @@
                         </div>
                     {% endif %}
                     </div>
-                    <div class="mt-2">
+                    <div class="mt-2 text-white">
                         {{ comentario.contenido|linebreaks }}
                     </div>
                 </div>
@@ -52,8 +52,8 @@
         </div>
             {% else %}
                 <div class="text-center py-4">
-                    <i class="far fa-comments fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No hay comentarios que coincidan con tu búsqueda.</p>
+                    <i class="far fa-comments fa-3x text-white mb-3"></i>
+                    <p class="text-white">No hay comentarios que coincidan con tu búsqueda.</p>
                 </div>
             {% endif %}
 </div>

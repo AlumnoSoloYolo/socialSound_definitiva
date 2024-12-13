@@ -390,6 +390,8 @@ Estoy especificando ejemplos de los distintos filtros que he utilizado, los cual
       
         
 
+Lo primero que tienes que hacer para probar los CRUDS es logearte. Una vez logueado te redirijirá a la página principal donde
+encontrarás distintas listas con todos los CRUDS.
 
 
 

@@ -445,20 +445,16 @@ class CancionForm(ModelForm):
 class DetallesCancionForm(ModelForm):
     class Meta:
         model = DetallesCancion
-        fields = ['letra', 'creditos', 'duracion', 'idioma']
+        fields = ['letra', 'creditos', 'idioma']
         widgets = {
             'letra': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'creditos': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'duracion': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'idioma': forms.TextInput(attrs={'class': 'form-control'})
         }
 
     def clean(self):
         super().clean()
 
-        duracion = self.cleaned_data.get('duracion')
-        if not duracion:
-            self.add_error('duracion', 'La duración es obligatoria')
       
         creditos = self.cleaned_data.get('creditos')
         if creditos and len(creditos) > 1000:
@@ -658,6 +654,69 @@ class PlaylistForm(ModelForm):
 
         return cleaned_data
 
+class BusquedaAvanzadaPlaylistForm(forms.Form):
+    nombre = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Buscar por nombre de playlist'
+        })
+    )
+    
+    usuario = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Buscar por nombre de usuario'
+        })
+    )
+    
+    fecha_desde = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+    
+    fecha_hasta = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date'
+        })
+    )
+    
+    publica = forms.ChoiceField(
+        choices=[('', 'Todas'), ('True', 'Públicas'), ('False', 'Privadas')],
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+   
+        if not any(cleaned_data.values()):
+            self.add_error(None, 'Debes especificar al menos un criterio de búsqueda')
+        
+
+        fecha_desde = cleaned_data.get('fecha_desde')
+        fecha_hasta = cleaned_data.get('fecha_hasta')
+        if fecha_desde and fecha_hasta and fecha_desde > fecha_hasta:
+            self.add_error('fecha_desde', 'La fecha inicial no puede ser posterior a la fecha final')
+            self.add_error('fecha_hasta', 'La fecha final no puede ser anterior a la fecha inicial')
+        
+     
+        for field in ['nombre', 'usuario']:
+            value = cleaned_data.get(field)
+            if value and len(value) < 3:
+                self.add_error(field, f'Ingresa al menos 3 caracteres para buscar por {field}')
+
+        return cleaned_data
+
     
 
 class MensajePrivadoForm(ModelForm):
@@ -685,6 +744,11 @@ class MensajePrivadoForm(ModelForm):
             self.add_error('contenido', "El mensaje no puede exceder los 1000 caracteres")
 
         return self.cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
 
 
 class BusquedaMensajesForm(forms.Form):

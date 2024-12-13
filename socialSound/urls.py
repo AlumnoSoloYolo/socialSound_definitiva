@@ -10,6 +10,8 @@ urlpatterns = [
      path('usuarios/busqueda-avanzada/', views.busqueda_avanzada_usuarios, name='busqueda_avanzada_usuarios'),
      path('seguir/<int:usuario_id>/', views.seguir_usuario, name='seguir_usuario'),
      path('dejar-de-seguir/<int:usuario_id>/', views.dejar_de_seguir_usuario, name='dejar_de_seguir_usuario'),
+
+     
      # path('perfil/<str:nombre_usuario>/album/crear/', views.crear_album, name='crear_album'),
      path('perfil/<str:nombre_usuario>/album/<int:album_id>/editar/', views.editar_album, name='editar_album'),
      path('album/busqueda-avanzada/', views.busqueda_avanzada_album, name='busqueda_avanzada_albumes'),
@@ -26,6 +28,8 @@ urlpatterns = [
      path('playlist/crear/', views.crear_playlist, name='crear_playlist'),
      path('playlists/<int:playlist_id>/editar/', views.editar_playlist, name='editar_playlist'),
      path('playlists/<int:playlist_id>/agregar-cancion/', views.agregar_cancion_playlist, name='agregar_cancion_playlist'),
+     path('playlists/busqueda-avanzada/', views.busqueda_avanzada_playlists, name='busqueda_avanzada_playlists'),
+     path('playlist/eliminar/<int:playlist_id>/', views.eliminar_playlist, name='eliminar_playlist'),
      path('chat/<int:usuario_id>/', views.crear_mensaje_privado, name='chat'),
      path('mensaje/editar/<int:mensaje_id>/', views.editar_mensaje, name='editar_mensaje'),
      path('chats/', views.lista_chats, name='lista_chats'),
