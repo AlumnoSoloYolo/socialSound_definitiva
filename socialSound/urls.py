@@ -34,12 +34,8 @@ urlpatterns = [
      path('mensaje/eliminar/<int:mensaje_id>/', views.eliminar_mensaje, name='eliminar_mensaje'),
 
 
-
-
-
-    
-    path('usuarios/<str:nombre_usuario>/seguidores/', views.lista_seguidores, name='usuarios_seguidores'),
-path('usuarios/<str:nombre_usuario>/seguidos/', views.lista_seguidos, name='usuarios_seguidos'),
+     path('usuarios/<str:nombre_usuario>/seguidores/', views.lista_seguidores, name='usuarios_seguidores'),
+     path('usuarios/<str:nombre_usuario>/seguidos/', views.lista_seguidos, name='usuarios_seguidos'),
 
      path('', views.index, name='index'),  # Página de inicio con enlaces a todas las URLs
      path('mensajes_privados/<int:emisor_id>/<int:receptor_id>/', views.mensajes_privados, name='mensajes_privados'),

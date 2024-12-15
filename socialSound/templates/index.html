@@ -312,8 +312,8 @@
                             <ul class="list-group">
                                 <li class="list-group-item"><a href="{% url 'perfil_usuario' nombre_usuario=user.nombre_usuario %}">Crear Canción</a></li>
                                 <li class="list-group-item"><a href="{% url 'busqueda_avanzada_canciones' %}">Buscar Canciones</a></li>
-                                <li class="list-group-item"><a href="{% url 'perfil_usuario' nombre_usuario=user.nombre_usuario %}">Editar Canción</a></li>
-                                <li class="list-group-item"><a href="{% url 'perfil_usuario' nombre_usuario=user.nombre_usuario %}">Eliminar Canción</a></li>
+                                <li class="list-group-item"><a href="{% url 'canciones_album' album_id=10 %}">Editar Canción</a></li>
+                                <li class="list-group-item"><a href="{% url 'canciones_album' album_id=10 %}">Eliminar Canción</a></li>
                             </ul>
                         </div>
                     </div>
@@ -354,10 +354,10 @@
                     <div id="collapseMensajes" class="collapse" aria-labelledby="headingMensajes">
                         <div class="card-body">
                             <ul class="list-group">
-                                <li class="list-group-item"><a href="{% url 'chat' usuario_id=0 %}">Crear Mensaje</a></li>
+                                <li class="list-group-item"><a href="{% url 'chat' usuario_id=2 %}">Crear Mensaje</a></li>
                                 <li class="list-group-item"><a href="{% url 'lista_chats' %}">Ver Chats</a></li>
-                                <li class="list-group-item"><a href="{% url 'editar_mensaje' mensaje_id=0 %}">Editar Mensaje</a></li>
-                                <li class="list-group-item"><a href="{% url 'eliminar_mensaje' mensaje_id=0 %}">Eliminar Mensaje</a></li>
+                                <li class="list-group-item"><a href="{% url 'chat' usuario_id=2 %}">Editar Mensaje</a></li>
+                                <li class="list-group-item"><a href="{% url 'chat' usuario_id=2 %}">Eliminar Mensaje</a></li>
                             </ul>
                         </div>
                     </div>
@@ -376,10 +376,10 @@
                     <div id="collapseComentarios" class="collapse" aria-labelledby="headingComentarios">
                         <div class="card-body">
                             <ul class="list-group">
-                                <li class="list-group-item"><a href="{% url 'crear_comentario' album_id=0 %}">Crear Comentario</a></li>
-                                <li class="list-group-item"><a href="{% url 'busqueda_avanzada_comentarios' album_id=0 %}">Buscar Comentarios</a></li>
-                                <li class="list-group-item"><a href="{% url 'editar_comentario' album_id=0 comentario_id=0 %}">Editar Comentario</a></li>
-                                <li class="list-group-item"><a href="{% url 'eliminar_comentario' album_id=0 comentario_id=0 %}">Eliminar Comentario</a></li>
+                                <li class="list-group-item"><a href="{% url 'crear_comentario' album_id=10 %}">Crear Comentario</a></li>
+                                <li class="list-group-item"><a href="{% url 'comentarios_album' album_id=10 %}">Buscar Comentarios</a></li>
+                                <li class="list-group-item"><a href="{% url 'comentarios_album' album_id=10 %}">Buscar Comentarios</a></li>
+                                <li class="list-group-item"><a href="{% url 'comentarios_album' album_id=10 %}">Eliminar Comentario</a></li>
                             </ul>
                         </div>
                     </div>
@@ -400,8 +400,8 @@
                             <ul class="list-group">
                                 <li class="list-group-item"><a href="{% url 'crear_playlist' %}">Crear Playlist</a></li>
                                 <li class="list-group-item"><a href="{% url 'busqueda_avanzada_playlists' %}">Buscar Playlists</a></li>
-                                <li class="list-group-item"><a href="{% url 'editar_playlist' playlist_id=0 %}">Editar Playlist</a></li>
-                                <li class="list-group-item"><a href="{% url 'eliminar_playlist' playlist_id=0 %}">Eliminar Playlist</a></li>
+                                <li class="list-group-item"><a href="{% url 'lista_playlist' nombre_usuario=request.user %}">Editar Playlist</a></li>
+                                <li class="list-group-item"><a href="{% url 'lista_playlist' nombre_usuario=request.user %}">Eliminar Playlist</a></li>
                             </ul>
                         </div>
                     </div>

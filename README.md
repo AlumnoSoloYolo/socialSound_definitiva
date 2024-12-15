@@ -388,222 +388,369 @@ Son frecuentes en todo el proyecto, pero aquí especifico un ejemplo que muestra
 
 Estoy especificando ejemplos de los distintos filtros que he utilizado, los cuales repito en el proyecto sumando más de 10. 
       
+------------------------------------------------------------------------------------------------------------------------------
 
 Lo primero que tienes que hacer para probar los CRUDS es logearte. Una vez logueado te redirijirá a la página principal donde
 encontrarás distintas listas con todos los CRUDS.
 
-# CRUD USUARIO
+LOG: NOMBRE_USUARIO=fran, PASSWORD='fran'
 
+o haz tu propio registro
 
-# CREATE - UsuarioModelForm
+Validaciones del Sistema
+Índice
 
-    - Validación del Email
-    
-    Reglas
+CRUD Usuario
+CRUD Álbum
+CRUD Canción
+CRUD Comentario
+CRUD Playlist
+Mensajes Privados
 
-    Campo obligatorio (no puede estar vacío)
-    Debe coincidir con el patrón de email: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+CRUD Usuario
+CREATE - UsuarioModelForm
+Email
 
-    Mensajes de Error
+Reglas:
 
-    Si está vacío: "Este campo es requerido."
-    Si formato inválido: "Introduce un correo electrónico válido."
+Campo obligatorio
+Patrón: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+Máximo 100 caracteres
 
-    Ejemplos
-    usuario@dominio.com
-  
-    - Validación de nombre de usuario 
 
-    Reglas
+Errores:
 
-    Campo obligatorio (no puede estar vacío)
-    Solo permite letras, números y guiones bajos: ^[a-zA-Z0-9_]+$
-    Debe ser único en el sistema
+"Este campo es requerido"
+"Introduce un correo electrónico válido"
 
-    Mensajes de Error
 
-    Si está vacío: "Este campo es requerido."
-    Si formato inválido: "El nombre de usuario solo puede contener letras, números y guiones bajos"
-    Si ya existe: "Nombre de usuario en uso"
 
-    Ejemplos
-    ✓ usuario123
-    ✗ usuario@123
-    ✗ usuario espacio
-    ✗ usuario#especial
+Nombre Usuario
 
+Reglas:
 
-    - Validación de la Contraseña
+Campo obligatorio
+Solo letras, números y guiones bajos: ^[a-zA-Z0-9_]+$
+Debe ser único
+Máximo 100 caracteres
 
-    Reglas
 
-    Campo obligatorio (no puede estar vacío)
-    Debe cumplir con el patrón: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$
-    
-    [Mínimo 8 caracteres
-    Al menos una mayúscula
-    Al menos una minúscula
-    Al menos un número
-    Al menos un carácter especial (@$!%*?&)]
+Errores:
 
-    Mensajes de Error
+"Este campo es requerido"
+"El nombre de usuario solo puede contener letras, números y guiones bajos"
+"Nombre de usuario en uso"
 
-    Si está vacío: "Este campo es requerido."
-    Si formato inválido: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)"
 
-    Ejemplos
-    Copy✓ Ejemplo1@
-    ✓ Password123$
-    ✗ password
-    ✗ Password
-    ✗ Password1
-    ✗ pass
 
-# UPDATE - UsuarioUpdateForm
+Contraseña
 
-    - Validación del Email
+Reglas:
 
-    Reglas
+Campo obligatorio
+Mínimo 8 caracteres
+Al menos una mayúscula, minúscula, número y carácter especial
+Patrón: ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$
 
-    Campo obligatorio (no puede estar vacío)
-    Debe coincidir con el patrón: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
 
-    Mensajes de Error
+Errores:
 
-    Si está vacío: "Este campo es requerido."
-    Si formato inválido: "Introduce un correo electrónico válido."
+"Este campo es requerido"
+"La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)"
 
-    Ejemplos
-    ✓ usuario@dominio.com
-    ✓ nombre.apellido@empresa.es
-    ✗ usuario@
-    ✗ @dominio.com
 
 
-    - Validación del Nombre de Usuario
+UPDATE - UsuarioUpdateForm
 
-    Reglas
+Mantiene las validaciones de email y nombre de usuario
+Contraseña opcional
 
-    Campo obligatorio (no puede estar vacío)
-    Solo permite letras, números y guiones bajos: ^[a-zA-Z0-9_]+$
-    Debe ser único en el sistema
-    Verifica si es el mismo usuario antes de validar unicidad
+SEARCH - BusquedaAvanzadaUsuarioForm
+Campos de Edad
 
-    Mensajes de Error
+Reglas:
 
-    Si está vacío: "Este campo es requerido."
-    Si formato inválido: "El nombre de usuario solo puede contener letras, números y guiones bajos"
-    Si ya existe: "Nombre de usuario en uso"
+Rango: 1-120 años
+Validación cruzada de edad_min y edad_max
 
-    Ejemplos
-    ✓ usuario123
-    ✓ nombre_usuario
-    ✗ usuario@123
-    ✗ usuario espacio
 
+Errores:
 
-# READ - BusquedaavanzadaUsuarioForm
+"La edad mínima no puede ser mayor que la edad máxima"
 
-    Reglas
 
-    Al menos un campo debe contener un valor
-    No se permiten todos los campos vacíos
 
-    Mensajes de Error
+CRUD Album
+CREATE - AlbumModelForm
+Título
 
-    Si todos están vacíos: "Debes especificar al menos un criterio de búsqueda"
+Reglas:
 
-    Ejemplos
-    ✓ Solo nombre_usuario con valor
-    ✓ Solo ciudad con valor
-    ✓ Cualquier combinación de campos
-    ✗ Todos los campos vacíos
+Campo obligatorio
+Máximo 200 caracteres
+Único en combinación con artista
 
 
-    - Validación de Edades
-    
-    Reglas
+Errores:
 
-    Rango permitido: 1-120 años
-    Si solo hay edad_min, edad_max = edad_min
-    Si solo hay edad_max, edad_min = edad_max
-    edad_min no puede ser mayor que edad_max
-    Se convierten automáticamente a fechas:
+"El título es obligatorio"
+"El título no puede exceder los 200 caracteres"
+"Ya existe un álbum con este título y artista"
 
-    fecha_max = fecha_actual - edad_min
-    fecha_min = fecha_actual - (edad_max + 1)
 
-    Mensajes de Error
 
-    Si edad_min > edad_max: "La edad mínima no puede ser mayor que la edad máxima"
+Artista
 
-    Ejemplos
-    ✓ edad_min: 18, edad_max: 25
-    ✓ edad_min: 30 (automáticamente edad_max = 30)
-    ✓ edad_max: 50 (automáticamente edad_min = 50)
-    ✗ edad_min: 40, edad_max: 30
-    ✗ edad_min: 150 (fuera de rango)
+Reglas:
 
+Campo obligatorio
+Máximo 200 caracteres
 
 
-# CRUD ALBUM
+Errores:
 
+"El artista es obligatorio"
+"El nombre del artista no puede exceder los 200 caracteres"
 
-# CREATE - AlbumModelForm
 
-    - Validación del Título
-    
-    Reglas
 
-    Campo obligatorio
-    Longitud máxima: 200 caracteres
-    Debe ser único en combinación con el artista
+SEARCH - BusquedaAvanzadaAlbumForm
 
-    Mensajes de Error
+Reglas:
 
-    Si está vacío: "El título es obligatorio"
-    Si excede longitud: "El título no puede exceder los 200 caracteres"
-    Si duplicado: "Ya existe un álbum con este título y artista"
+Mínimo 3 caracteres para búsquedas por texto
+Fechas coherentes
 
-    Ejemplos
-    ✓ "Dark Side of the Moon"
-    ✓ "Abbey Road"
-    ✗ "" (vacío)
-    ✗ "Lorem ipsum..." (más de 200 caracteres)
-    ✗ Título duplicado del mismo artista
 
+Errores:
 
-    - Validación del Artista
+"Debes especificar al menos un criterio de búsqueda"
+"La fecha inicial no puede ser posterior a la fecha final"
 
-    Reglas
 
-    Campo obligatorio
-    Longitud máxima: 200 caracteres
 
-    Mensajes de Error
+CRUD Canción
+CREATE - CancionForm
+Título
 
-    Si está vacío: "El artista es obligatorio"
-    Si excede longitud: "El nombre del artista no puede exceder los 200 caracteres"
+Reglas:
 
-    Ejemplos
-    ✓ "Pink Floyd"
-    ✓ "The Beatles"
-    ✗ "" (vacío)
-    ✗ "Lorem ipsum..." (más de 200 caracteres)
+Campo obligatorio
+Entre 3 y 200 caracteres
 
-    Validación de Unicidad Compuesta
 
-    Reglas
+Errores:
 
-    La combinación título-artista debe ser única
-    Se excluye el álbum actual en actualizaciones
-    Se verifica en la base de datos
+"El título es obligatorio"
+"El título debe tener al menos 3 caracteres"
+"El título no puede exceder los 200 caracteres"
 
-# READ - BusquedaAvanzadaAlbumForm
 
-    
 
+Archivo Audio
 
+Reglas:
+
+Formatos: .wav, .mp3
+Máximo 70MB
+
+
+Errores:
+
+"Solo se permiten archivos .wav o .mp3"
+"El archivo no puede ser mayor a 70MB"
+
+
+
+DetallesCancionForm
+
+Créditos: Máximo 1000 caracteres
+
+CRUD Comentario
+CREATE - ComentarioModelForm
+
+Reglas:
+
+No vacío
+No solo espacios
+Máximo 1000 caracteres
+
+
+Errores:
+
+"El contenido es obligatorio"
+"El comentario no puede estar vacío"
+"El comentario no puede tener más de 1000 caracteres"
+
+
+
+CRUD Playlist
+CREATE - PlaylistForm
+
+Nombre:
+
+Mínimo 3 caracteres
+
+
+Descripción:
+
+Máximo 500 caracteres
+
+
+Errores:
+
+"El nombre de la playlist debe tener al menos 3 caracteres"
+"La descripción no puede tener más de 500 caracteres"
+
+
+
+Mensajes Privados
+CREATE - MensajePrivadoForm
+
+Reglas:
+
+No vacío
+No solo espacios
+Entre 1 y 1000 caracteres
+
+
+Errores:
+
+"El mensaje no puede estar vacío o contener solo espacios"
+"El mensaje debe contener al menos 1 carácter"
+"El mensaje no puede exceder los 1000 caracteres"
+
+
+
+# Widgets Utilizados en el Sistema
+Input Básicos
+
+TextInput:
+
+Clase: 'form-control'
+Usado en: nombres, títulos, artistas
+
+
+EmailInput:
+
+Clase: 'form-control'
+Usado en: campos de email
+
+
+PasswordInput:
+
+Clase: 'form-control'
+Usado en: contraseñas
+
+
+
+Áreas de Texto
+
+Textarea:
+
+Clase: 'form-control'
+Atributos comunes:
+
+rows: 3-4
+cols: 50
+
+
+Usado en: biografías, descripciones, mensajes
+
+
+
+Campos de Fecha
+
+DateInput:
+
+Clase: 'form-control'
+type: 'date'
+Usado en: fechas de nacimiento, búsquedas por fecha
+
+
+
+Campos de Archivo
+
+FileInput:
+
+Clase: 'form-control'
+Usado en: fotos de perfil, portadas, archivos de audio
+
+
+
+Campos de Selección
+
+Select:
+
+Clase: 'form-control'
+Usado en: etiquetas, categorías
+
+
+
+Campos de Múltiple Selección
+
+CheckboxSelectMultiple:
+
+Clase: 'form-check-input me-1'
+Usado en: selección de canciones en playlist
+
+
+
+Checkbox Individual
+
+CheckboxInput:
+
+Clase: 'form-check-input'
+Usado en: opciones booleanas (ej: playlist pública)
+
+
+
+Campos Numéricos
+
+NumberInput:
+
+Clase: 'form-control'
+Usado en: campos de edad   
+
+
+
+# subir arcihvos
+
+Configura los ajustes de medios:
+
+Añade MEDIA_URL y MEDIA_ROOT en settings.py
+Esto define dónde se guardarán los archivos subidos
+
+
+Crea el modelo:
+
+Define un modelo que incluya FileField o ImageField
+FileField es para cualquier tipo de archivo
+ImageField es específico para imágenes
+
+
+Crea el formulario:
+
+Usa ModelForm para manejar la subida de archivos
+Especifica los campos que quieres incluir
+
+
+Configura la vista:
+
+Crea una vista que maneje tanto GET como POST
+Asegúrate de incluir request.FILES al procesar el formulario
+
+
+Configura las URLs:
+
+Añade la ruta para tu vista
+Incluye la configuración static() para servir los archivos en desarrollo
+
+
+Crea la plantilla HTML:
+
+Usa enctype="multipart/form-data" en el formulario
+Incluye {% csrf_token %} para seguridad
 
 
 
