@@ -19,10 +19,16 @@ class UsuarioModelForm(ModelForm):
         required=False,
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
+    
+    rol = forms.ChoiceField(
+        choices=Usuario.ROLES,
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     class Meta:
         model = Usuario
-        fields = ['email', 'nombre_usuario', 'password', 'bio', 'ciudad', 'fecha_nac', 'foto_perfil']
+        fields = ['email', 'nombre_usuario', 'password', 'bio', 'ciudad', 'fecha_nac', 'foto_perfil', 'rol']
         labels = '__all__'
         help_texts = {
             'email': '100 caracteres como máximo',

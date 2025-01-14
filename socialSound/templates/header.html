@@ -5,6 +5,7 @@
 {% endblock %}
 
 <nav class="navbar navbar-expand-lg">
+    
     <div class="container-fluid">
         <a class="navbar-brand" href="/">
             <img src="{% static 'images/Logo.png' %}" alt="Logo" class="logo">
@@ -64,6 +65,10 @@
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fa-solid fa-user-astronaut nav-icon"></i>{{ user.nombre_usuario }}
                         </a>
+
+                        
+
+
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li ><a class="dropdown-item" href="{% url 'perfil_usuario' request.user.nombre_usuario %}">
                                 <i class="fa-solid fa-user-astronaut nav-icon"></i>
@@ -72,6 +77,30 @@
                             </li>
                             <li><a class="dropdown-item" href="{% url 'logout' %}">
                                 <i class="fa-solid fa-right-from-bracket nav-icon"></i>Cerrar sesión</a>
+                            </li>
+                            <li>
+                                <span class="dropdown-item">
+                                    <i class="fas fa-clock nav-icon"></i>
+                                    Última conexión: {{ request.session.ultima_conexion }}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="dropdown-item">
+                                    <i class="fas fa-users nav-icon"></i>
+                                    Seguidores: {{ request.session.total_seguidores }}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="dropdown-item">
+                                    <i class="fas fa-user-friends nav-icon"></i>
+                                    Siguiendo: {{ request.session.total_seguidos }}
+                                </span>
+                            </li>
+                            <li>
+                                <span class="dropdown-item">
+                                    <i class="fas fa-heart nav-icon"></i>
+                                    Albumes: {{ request.session.total_albumes }}
+                                </span>
                             </li>
                         </ul>
                     </li>

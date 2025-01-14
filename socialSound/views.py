@@ -1,23 +1,24 @@
 from django.shortcuts import render, redirect
 from django.db.models import Sum, Q, Prefetch, Count
-from .models import Usuario, Album, Cancion, Playlist, CancionPlaylist, Guardado, MensajePrivado, Comentario, EstadisticasAlbum, DetalleAlbum
+from .models import Usuario, Album, Cancion, Playlist, CancionPlaylist, Guardado, MensajePrivado, Like, Comentario, EstadisticasAlbum, DetalleAlbum
 from django.views.defaults import page_not_found
 from .forms import UsuarioModelForm, LoginForm, BusquedaAvanzadaUsuarioForm, AlbumModelForm, DetalleAlbumModelForm, BusquedaAvanzadaAlbumForm, ComentarioModelForm, BusquedaAvanzadaComentarioForm, CancionForm, DetallesCancionForm, BusquedaAvanzadaCancionForm, PlaylistForm, MensajePrivadoForm, BusquedaMensajesForm, UsuarioUpdateForm, BusquedaAvanzadaPlaylistForm
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from dateutil.relativedelta import relativedelta
-from django.urls import reverse
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from datetime import date
 from django.contrib.auth import logout
 from django.db import transaction
-from django.forms import formset_factory, modelformset_factory
+from django.forms import formset_factory
 from django.db.models import Max
-from django.core.exceptions import ObjectDoesNotExist
+from datetime import datetime
+from functools import wraps
+from django.contrib.auth.decorators import user_passes_test
 
 
 ## CRUD Usuario
- 
 
 def registro_usuario(request):
     datosFormulario = None
@@ -71,6 +72,12 @@ def login_usuario(request):
 
             if user is not None:
                 login(request, user)
+                
+                request.session['ultima_conexion'] = timezone.now().strftime('%d/%m/%Y %H:%M')
+                request.session['total_seguidores'] = user.obtener_seguidores().count()
+                request.session['total_seguidos'] = user.obtener_seguidos().count()
+                request.session['total_albumes'] = Album.objects.select_related('usuario').filter(usuario=user).count()
+                
                 messages.success(request, f'Bienvenido {user.nombre_usuario}', extra_tags='login')
                 return redirect('index')
             else:
@@ -82,6 +89,16 @@ def login_usuario(request):
 
 @login_required
 def logout_view(request):
+    
+    if 'ultima_conexion' in request.session:
+        del request.session['ultima_conexion']
+    if 'total_seguidores' in request.session:
+        del request.session['total_seguidores']
+    if 'total_seguidos' in request.session:
+        del request.session['total_seguidos']
+    if 'total_albumes' in request.session:
+        del request.session['total_albumes']
+        
     logout(request)
     return redirect('login_usuario')
 
@@ -428,6 +445,7 @@ def editar_cancion(request, cancion_id):
         'title': f'Editar Canción: {cancion.titulo}'
     })
 
+@login_required
 def eliminar_cancion(request, cancion_id):
     cancion = Cancion.objects.get(id=cancion_id)
     album_id = cancion.album.id
@@ -982,6 +1000,10 @@ def eliminar_playlist(request, playlist_id):
 # 1. Página de inicio con enlaces a todas las URLs
 @login_required
 def index(request):
+    
+    if(not 'fecha_inicio' in request.session):
+        request.session['fecha_inicio'] = datetime.now().strftime('%d/%m/%Y %H:%M')
+        
     # Renderiza la plantilla principal con enlaces a las demás páginas de la aplicación
     return render(request, "index.html")
 

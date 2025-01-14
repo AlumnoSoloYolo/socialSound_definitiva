@@ -20,45 +20,61 @@ class UsuarioManager(BaseUserManager):
        extra_fields.setdefault('is_staff', True)
        extra_fields.setdefault('is_superuser', True)
        return self.create_user(nombre_usuario, email, password, **extra_fields)
+   
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
-   nombre_usuario = models.CharField(max_length=100, unique=True)
-   email = models.EmailField(unique=True)
-   bio = models.TextField(blank=True)
-   ciudad = models.CharField(max_length=150, blank=True)
-   foto_perfil = models.ImageField(upload_to='fotos_perfil/',default='fotos_perfil/default_profile.png', blank=True)
-   fecha_nac = models.DateField()
-   is_active = models.BooleanField(default=True)
-   is_staff = models.BooleanField(default=False)
-   date_joined = models.DateTimeField(default=timezone.now)
+    
+    CLIENTE = 1
+    MODERADOR = 2
+    ROLES = (
+        (CLIENTE, 'cliente'),
+        (MODERADOR, 'moderador'),
+    )
+    nombre_usuario = models.CharField(max_length=100, unique=True)
+    email = models.EmailField(unique=True)
+    bio = models.TextField(blank=True)
+    ciudad = models.CharField(max_length=150, blank=True)
+    foto_perfil = models.ImageField(upload_to='fotos_perfil/', default='fotos_perfil/default_profile.png', blank=True)
+    fecha_nac = models.DateField(null=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(default=timezone.now)
+    rol = models.PositiveIntegerField(choices=ROLES, default=CLIENTE)
 
-   objects = UsuarioManager()
+    objects = UsuarioManager()
 
-   USERNAME_FIELD = 'nombre_usuario'
-   REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'nombre_usuario'
+    REQUIRED_FIELDS = ['email']
 
-   def __str__(self):
-        return self.nombre_usuario
+    def __str__(self):
+            return self.nombre_usuario
 
     # Métodos para gestionar seguidores
-   def seguir(self, otro_usuario):
-        # Permite que este usuario siga a otro usuario
-        if otro_usuario != self:  # No se puede seguir a uno mismo
-            Seguidores.objects.get_or_create(seguidor=self, seguido=otro_usuario)
+    def seguir(self, otro_usuario):
+            # Permite que este usuario siga a otro usuario
+            if otro_usuario != self:  # No se puede seguir a uno mismo
+                Seguidores.objects.get_or_create(seguidor=self, seguido=otro_usuario)
 
-   def dejar_de_seguir(self, otro_usuario):
-        # Permite que este usuario deje de seguir a otro usuario
-        Seguidores.objects.filter(seguidor=self, seguido=otro_usuario).delete()
+    def dejar_de_seguir(self, otro_usuario):
+            # Permite que este usuario deje de seguir a otro usuario
+            Seguidores.objects.filter(seguidor=self, seguido=otro_usuario).delete()
 
-   def obtener_seguidores(self):
-        # Devuelve una lista de usuarios que siguen a este usuario
-        return Usuario.objects.filter(seguidores__seguido=self)  # Cambiado a 'seguido=self'
+    def obtener_seguidores(self):
+            # Devuelve una lista de usuarios que siguen a este usuario
+            return Usuario.objects.filter(seguidores__seguido=self)  # Cambiado a 'seguido=self'
 
-   def obtener_seguidos(self):
-        # Devuelve una lista de usuarios a los que este usuario sigue
-        return Usuario.objects.filter(siguiendo__seguidor=self)
+    def obtener_seguidos(self):
+            # Devuelve una lista de usuarios a los que este usuario sigue
+            return Usuario.objects.filter(siguiendo__seguidor=self)
+        
 
+class Cliente(models.Model):
+    usuario = models.OneToOneField(Usuario, related_name="cliente", on_delete=models.CASCADE)
+    
 
+class Moderador(models.Model):
+    usuario = models.OneToOneField(Usuario, related_name="moderador", on_delete=models.CASCADE)
+    
 
 
 class Seguidores(models.Model):
