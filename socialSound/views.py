@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.db.models import Sum, Q, Prefetch, Count
-from .models import Usuario, Album, Cancion, Playlist, CancionPlaylist, Guardado, MensajePrivado, Like, Comentario, EstadisticasAlbum, DetalleAlbum
+from .models import Usuario, Cliente, Moderador, Album, Cancion, Playlist, CancionPlaylist, Guardado, MensajePrivado, Like, Comentario, EstadisticasAlbum, DetalleAlbum
 from django.views.defaults import page_not_found
 from .forms import UsuarioModelForm, LoginForm, BusquedaAvanzadaUsuarioForm, AlbumModelForm, DetalleAlbumModelForm, BusquedaAvanzadaAlbumForm, ComentarioModelForm, BusquedaAvanzadaComentarioForm, CancionForm, DetallesCancionForm, BusquedaAvanzadaCancionForm, PlaylistForm, MensajePrivadoForm, BusquedaMensajesForm, UsuarioUpdateForm, BusquedaAvanzadaPlaylistForm
 from django.contrib import messages
@@ -14,8 +14,7 @@ from django.db import transaction
 from django.forms import formset_factory
 from django.db.models import Max
 from datetime import datetime
-from functools import wraps
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import Group
 
 
 ## CRUD Usuario
@@ -56,9 +55,21 @@ def crear_usuario(form):
                 usuario.foto_perfil = 'media/fotos_perfil/default_profile.png'
                 
             usuario.save()
+            rol = int(form.cleaned_data.get('rol'))
+            if(rol == Usuario.CLIENTE):
+                grupo = Group.objects.get(name='Clientes') 
+                grupo.user_set.add(usuario)
+                cliente = Cliente.objects.create( usuario = usuario)
+                cliente.save()
+            elif(rol == Usuario.MODERADOR):
+                grupo = Group.objects.get(name='Moderadores') 
+                grupo.user_set.add(usuario)
+                modedaror = Moderador.objects.create(usuario = usuario)
+                modedaror.save()
             usuario_creado = True
         except Exception as error:
             print(error)
+    
     return usuario_creado
 
 
