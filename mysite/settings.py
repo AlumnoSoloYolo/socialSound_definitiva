@@ -37,9 +37,9 @@ LOGOUT_REDIRECT_URL = 'login_usuario'  # Página a la que se redirige después d
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [env('ALLOWED_HOST')]
 
 INTERNAL_IPS = ['0.0.0.0']
 
