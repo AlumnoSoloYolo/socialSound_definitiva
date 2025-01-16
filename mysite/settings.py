@@ -16,6 +16,11 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import environ
+import os
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -25,13 +30,11 @@ LOGIN_URL = 'login_usuario'  # Nombre de tu URL de login
 LOGIN_REDIRECT_URL = 'perfil_usuario'  # Página a la que se redirige después del login
 LOGOUT_REDIRECT_URL = 'login_usuario'  # Página a la que se redirige después del logout
 
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dba-9kl)yc2(a66s8i_cb0(wt7#ol1ai%p@o8ot(zn7+=r2^5_'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
