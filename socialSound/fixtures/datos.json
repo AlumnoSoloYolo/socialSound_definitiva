@@ -1,5 +1,70 @@
 [
 {
+    "model": "admin.logentry",
+    "pk": 1,
+    "fields": {
+        "action_time": "2025-01-14T10:13:19.876Z",
+        "user": 17,
+        "content_type": 3,
+        "object_id": "1",
+        "object_repr": "Cliente",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 2,
+    "fields": {
+        "action_time": "2025-01-14T10:14:38.678Z",
+        "user": 17,
+        "content_type": 3,
+        "object_id": "2",
+        "object_repr": "Moderador",
+        "action_flag": 1,
+        "change_message": "[{\"added\": {}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 3,
+    "fields": {
+        "action_time": "2025-01-14T11:17:28.732Z",
+        "user": 17,
+        "content_type": 3,
+        "object_id": "2",
+        "object_repr": "Moderador",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Permissions\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 4,
+    "fields": {
+        "action_time": "2025-01-14T11:18:18.101Z",
+        "user": 17,
+        "content_type": 6,
+        "object_id": "19",
+        "object_repr": "moderador3",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Groups\", \"User permissions\"]}}]"
+    }
+},
+{
+    "model": "admin.logentry",
+    "pk": 5,
+    "fields": {
+        "action_time": "2025-01-14T11:18:37.749Z",
+        "user": 17,
+        "content_type": 6,
+        "object_id": "19",
+        "object_repr": "moderador3",
+        "action_flag": 2,
+        "change_message": "[{\"changed\": {\"fields\": [\"Groups\", \"User permissions\"]}}]"
+    }
+},
+{
     "model": "auth.permission",
     "pk": 1,
     "fields": {
@@ -648,6 +713,155 @@
     }
 },
 {
+    "model": "auth.permission",
+    "pk": 73,
+    "fields": {
+        "name": "Can add cliente",
+        "content_type": 19,
+        "codename": "add_cliente"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 74,
+    "fields": {
+        "name": "Can change cliente",
+        "content_type": 19,
+        "codename": "change_cliente"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 75,
+    "fields": {
+        "name": "Can delete cliente",
+        "content_type": 19,
+        "codename": "delete_cliente"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 76,
+    "fields": {
+        "name": "Can view cliente",
+        "content_type": 19,
+        "codename": "view_cliente"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 77,
+    "fields": {
+        "name": "Can add moderador",
+        "content_type": 20,
+        "codename": "add_moderador"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 78,
+    "fields": {
+        "name": "Can change moderador",
+        "content_type": 20,
+        "codename": "change_moderador"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 79,
+    "fields": {
+        "name": "Can delete moderador",
+        "content_type": 20,
+        "codename": "delete_moderador"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 80,
+    "fields": {
+        "name": "Can view moderador",
+        "content_type": 20,
+        "codename": "view_moderador"
+    }
+},
+{
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+        "name": "Cliente",
+        "permissions": [
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            73,
+            74,
+            75,
+            76,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            65,
+            66,
+            67,
+            68,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            77,
+            78,
+            79,
+            80,
+            61,
+            62,
+            63,
+            64,
+            69,
+            70,
+            71,
+            72,
+            21,
+            22,
+            23,
+            24
+        ]
+    }
+},
+{
+    "model": "auth.group",
+    "pk": 2,
+    "fields": {
+        "name": "Moderador",
+        "permissions": []
+    }
+},
+{
     "model": "contenttypes.contenttype",
     "pk": 1,
     "fields": {
@@ -792,11 +1006,35 @@
     }
 },
 {
+    "model": "contenttypes.contenttype",
+    "pk": 19,
+    "fields": {
+        "app_label": "socialSound",
+        "model": "cliente"
+    }
+},
+{
+    "model": "contenttypes.contenttype",
+    "pk": 20,
+    "fields": {
+        "app_label": "socialSound",
+        "model": "moderador"
+    }
+},
+{
     "model": "sessions.session",
     "pk": "3ahd1fop95509b4bxox6l47coao7g2kl",
     "fields": {
         "session_data": ".eJxVi0sOwiAQQO_C2jQwMJS6U4_gAQjMQGjUkkhZGe9uTbrQ7fu8hA99Lb639PQzi6NQIA6_MAa6peVrWqU53K-1LzzsdLj0ttbHaavPe_c3l9DKdrJlQlQJQ3SWOKkRIWecJFNyOjqKZsrSKEc2Zo4KJFhrAB3oETQa8f4AP_A2kQ:1tJEYG:USaUYr-B-zqTpWGFbnt3Hhl6XOK2iydwuJvrNjCU2Fw",
         "expire_date": "2024-12-19T16:18:04.722Z"
+    }
+},
+{
+    "model": "sessions.session",
+    "pk": "54502iz6k4whvte0u3naetuifmxyofzo",
+    "fields": {
+        "session_data": ".eJxVi0sOgjAQQO_StSEdwE7rTj2CB2hmOkMgKk0oXRnvLiYsdPs-LxOprmOsRZc4iTkZQHP4hUzprvPXlJwmetxynaXZaXOtZc3P81Zf9u5vHqmM28meAQKCD23yx8CKHQj11lnrNA0ti1PuJXlU5C6kMBAoaCfIhCjWvD8mhjda:1tXetP:wnG6ymqk5QHx5Jq9uzgW4E7_p3s7Mu2tACPA5rbDmBc",
+        "expire_date": "2025-01-28T11:15:31.173Z"
     }
 },
 {
@@ -856,6 +1094,14 @@
     }
 },
 {
+    "model": "sessions.session",
+    "pk": "sc3lelnxybh2ikqwijid7hs4xb2kwc6e",
+    "fields": {
+        "session_data": "e30:1tXc9p:Y6EwcuR0wXBrjB8BcT9rcbfWO3n0hqAOju1N47lO8B4",
+        "expire_date": "2025-01-28T08:20:17.032Z"
+    }
+},
+{
     "model": "socialSound.usuario",
     "pk": 2,
     "fields": {
@@ -871,6 +1117,7 @@
         "is_active": true,
         "is_staff": false,
         "date_joined": "2024-12-03T11:09:00.982Z",
+        "rol": 1,
         "groups": [],
         "user_permissions": []
     }
@@ -880,7 +1127,7 @@
     "pk": 8,
     "fields": {
         "password": "pbkdf2_sha256$870000$Ymqv0S2TfGz0cNG3Hr1HgZ$9FOjwcfh0gswXkmdlY5WNTxwg6gKmCCXHm1agR0J1Yo=",
-        "last_login": "2024-12-16T13:15:49.393Z",
+        "last_login": "2025-01-14T08:21:50.220Z",
         "is_superuser": false,
         "nombre_usuario": "fran",
         "email": "fran@gmail.com",
@@ -891,6 +1138,7 @@
         "is_active": true,
         "is_staff": false,
         "date_joined": "2024-12-03T16:58:10.823Z",
+        "rol": 1,
         "groups": [],
         "user_permissions": []
     }
@@ -911,6 +1159,7 @@
         "is_active": true,
         "is_staff": false,
         "date_joined": "2024-12-03T21:51:13.554Z",
+        "rol": 1,
         "groups": [],
         "user_permissions": []
     }
@@ -931,6 +1180,7 @@
         "is_active": true,
         "is_staff": false,
         "date_joined": "2024-12-04T00:22:10.130Z",
+        "rol": 1,
         "groups": [],
         "user_permissions": []
     }
@@ -951,6 +1201,7 @@
         "is_active": true,
         "is_staff": false,
         "date_joined": "2024-12-05T16:16:17.217Z",
+        "rol": 1,
         "groups": [],
         "user_permissions": []
     }
@@ -971,6 +1222,7 @@
         "is_active": true,
         "is_staff": false,
         "date_joined": "2024-12-05T16:17:52.087Z",
+        "rol": 1,
         "groups": [],
         "user_permissions": []
     }
@@ -991,6 +1243,7 @@
         "is_active": true,
         "is_staff": false,
         "date_joined": "2024-12-05T16:30:20.250Z",
+        "rol": 1,
         "groups": [],
         "user_permissions": []
     }
@@ -1011,6 +1264,7 @@
         "is_active": true,
         "is_staff": false,
         "date_joined": "2024-12-05T20:16:16.260Z",
+        "rol": 1,
         "groups": [],
         "user_permissions": []
     }
@@ -1031,8 +1285,104 @@
         "is_active": true,
         "is_staff": false,
         "date_joined": "2024-12-16T13:14:25.439Z",
+        "rol": 1,
         "groups": [],
         "user_permissions": []
+    }
+},
+{
+    "model": "socialSound.usuario",
+    "pk": 16,
+    "fields": {
+        "password": "pbkdf2_sha256$870000$8PoOEYDNnxsAcJNV8YLYZq$aDtUuFyDdH6wm+Bm40p0HXoMZQFoxTTpjsjtnVCcWI0=",
+        "last_login": "2025-01-14T08:41:15.933Z",
+        "is_superuser": false,
+        "nombre_usuario": "modedador1",
+        "email": "moderador1@gmail.com",
+        "bio": "Soy un moderador",
+        "ciudad": "sevilla",
+        "foto_perfil": "fotos_perfil/default_profile.png",
+        "fecha_nac": "1990-04-23",
+        "is_active": true,
+        "is_staff": false,
+        "date_joined": "2025-01-14T08:39:56.479Z",
+        "rol": 2,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "socialSound.usuario",
+    "pk": 17,
+    "fields": {
+        "password": "pbkdf2_sha256$870000$7oGpaf94MhxLmxt18iXHuJ$f9kC23XZ2uPF4zQqFYB9e5UdB7bLZo0HbH51aeTfFuQ=",
+        "last_login": "2025-01-14T11:15:31.167Z",
+        "is_superuser": true,
+        "nombre_usuario": "admin",
+        "email": "admin@admin.comn",
+        "bio": "",
+        "ciudad": "",
+        "foto_perfil": "fotos_perfil/default_profile.png",
+        "fecha_nac": null,
+        "is_active": true,
+        "is_staff": true,
+        "date_joined": "2025-01-14T09:45:32.906Z",
+        "rol": 1,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "socialSound.usuario",
+    "pk": 18,
+    "fields": {
+        "password": "pbkdf2_sha256$870000$nck0yzUvW6QXru2B3nkEm0$sFczOjUCDrW1SnSYsUFL6qz9BMRanAVVi2Df+rOG+X0=",
+        "last_login": null,
+        "is_superuser": false,
+        "nombre_usuario": "moderador2",
+        "email": "moderador2@gmail.com",
+        "bio": "Moderador@2",
+        "ciudad": "Sevilla",
+        "foto_perfil": "fotos_perfil/default_profile.png",
+        "fecha_nac": "1995-04-23",
+        "is_active": true,
+        "is_staff": false,
+        "date_joined": "2025-01-14T10:54:10.437Z",
+        "rol": 2,
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "socialSound.usuario",
+    "pk": 19,
+    "fields": {
+        "password": "pbkdf2_sha256$870000$9GHn6S3viY2w99k08NG8xC$gIUwnNh6k2lWL16WDe0sbAMygLc3u0NokfQ//6VQnbg=",
+        "last_login": null,
+        "is_superuser": false,
+        "nombre_usuario": "moderador3",
+        "email": "moderador3@gmail.com",
+        "bio": "Moderador@3",
+        "ciudad": "Sevilla",
+        "foto_perfil": "fotos_perfil/default_profile.png",
+        "fecha_nac": "1995-04-23",
+        "is_active": true,
+        "is_staff": false,
+        "date_joined": "2025-01-14T10:57:00Z",
+        "rol": 2,
+        "groups": [
+            2
+        ],
+        "user_permissions": [
+            23
+        ]
+    }
+},
+{
+    "model": "socialSound.moderador",
+    "pk": 1,
+    "fields": {
+        "usuario": 19
     }
 },
 {
@@ -1523,17 +1873,6 @@
 },
 {
     "model": "socialSound.mensajeprivado",
-    "pk": 4,
-    "fields": {
-        "emisor": 8,
-        "receptor": 15,
-        "contenido": "Invierte en fracciones de acciones sin comisiones solo con trendin topic\r\nwww.trendin_topic.oxc",
-        "fecha_envio": "2024-12-16T13:17:14.938Z",
-        "leido": false
-    }
-},
-{
-    "model": "socialSound.mensajeprivado",
     "pk": 5,
     "fields": {
         "emisor": 15,
@@ -1551,6 +1890,17 @@
         "receptor": 2,
         "contenido": "ghoalaa",
         "fecha_envio": "2024-12-16T13:20:54.937Z",
+        "leido": false
+    }
+},
+{
+    "model": "socialSound.mensajeprivado",
+    "pk": 7,
+    "fields": {
+        "emisor": 8,
+        "receptor": 15,
+        "contenido": "holaaaaa",
+        "fecha_envio": "2025-01-14T07:53:55.139Z",
         "leido": false
     }
 }

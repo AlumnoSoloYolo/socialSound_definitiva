@@ -57,12 +57,12 @@ def crear_usuario(form):
             usuario.save()
             rol = int(form.cleaned_data.get('rol'))
             if(rol == Usuario.CLIENTE):
-                grupo = Group.objects.get(name='Clientes') 
+                grupo = Group.objects.get(name='Cliente') 
                 grupo.user_set.add(usuario)
                 cliente = Cliente.objects.create( usuario = usuario)
                 cliente.save()
             elif(rol == Usuario.MODERADOR):
-                grupo = Group.objects.get(name='Moderadores') 
+                grupo = Group.objects.get(name='Moderador') 
                 grupo.user_set.add(usuario)
                 modedaror = Moderador.objects.create(usuario = usuario)
                 modedaror.save()
