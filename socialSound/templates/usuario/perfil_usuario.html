@@ -240,7 +240,7 @@
                             <!-- Cabecera con nombre y opciones -->
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h2 class="text-warning mb-0">{{ usuario.nombre_usuario }}</h2>
-                                {% if request.user.is_authenticated and request.user == usuario %}
+                                {% if request.user.is_authenticated and request.user == usuario or request.user.is_authenticated and request.user.rol == 2 %}
                                     <div class="dropdown">
                                         <button class="btn btn-outline-warning" type="button" id="profileDropdown" data-bs-toggle="dropdown">
                                             <i class="fa-solid fa-gear"></i>

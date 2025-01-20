@@ -2,19 +2,20 @@
 {% load static %}
 
 {% block custom_css %}
+<link rel="stylesheet" href="{% static 'css/fondo_estrella.css' %}">
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
 
 {% endblock %}
 
 {% block contenido %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
+<div class="container-index container-star">
+    <div class="stars"></div>
+            <div class="login-card w-50">
+                <div class="login-header">
                     <h2 class="text-center">Actualizar Perfil</h2>
                 </div>
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
+                
+                    <form method="POST" class="p-4" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         {% if form.non_field_errors %}
@@ -42,11 +43,10 @@
                         </div>
                         {% endfor %}
 
-                        <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+                        <button type="submit" class="btn btn-warning w-100">Guardar Cambios</button>
                     </form>
-                </div>
+            
             </div>
-        </div>
-    </div>
+
 </div>
 {% endblock %}

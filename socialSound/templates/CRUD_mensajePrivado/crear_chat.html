@@ -122,7 +122,8 @@
                     <div class="d-flex {% if mensaje.emisor == request.user %}justify-content-end{% else %}justify-content-start{% endif %} my-2">
                         <div class="message-bubble {% if mensaje.emisor == request.user %}sent text-white{% else %}received text-white{% endif %} rounded p-3" style="max-width: 75%;">
                             <p class="mb-1" style="word-wrap: break-word;">{{ mensaje.contenido }}</p>
-                            {% if mensaje.emisor == request.user %}
+                    
+                            {% if request.user.is_authenticated and mensaje.emisor == request.user or request.user.is_authenticated and request.user.rol == 2 %}
                                 <div class="message-actions ms-2">
                                     <a href="{% url 'editar_mensaje' mensaje.id %}" class="btn edit-btn btn-sm">
                                         <i class="fas fa-edit"></i>

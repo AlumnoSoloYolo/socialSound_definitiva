@@ -211,8 +211,6 @@ PARTE 2: aclaraciones y especificaciones de URLs y Vistas
 NO SE SIRVEN EN MODO PRODUCCIÓN. Si quieres verlo poner DEBUG = True
 
 
-
-
 ## Estructura de URLs
 
 A continuación, se detallan las URLs disponibles en la aplicación, junto con las vistas correspondientes y sus funcionalidades.
@@ -751,6 +749,85 @@ Crea la plantilla HTML:
 
 Usa enctype="multipart/form-data" en el formulario
 Incluye {% csrf_token %} para seguridad
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+# SESIONES Y PERMISOS
+
+## Tipos de Usuario y sus Funcionalidades
+
+### 1. Cliente (Usuario normal)
+Gestión de Perfil:
+  - Crear y editar su propio perfil
+  - Ver perfiles de otros clientes (no puede ver perfiles de moderadores ni administradores)
+
+Contenido Musical:
+  - Crear, editar y eliminar sus propios álbumes
+  - Subir, editar y eliminar sus propias canciones
+  - Ver todos los álbumes y canciones de la plataforma
+
+Playlists:
+  - Crear playlists propias
+  - Añadir cualquier canción a sus playlists
+  - Editar y eliminar sus propias playlists
+
+Interacción Social:
+  - Seguir a otros clientes
+  - Comentar en álbumes
+  - Editar y eliminar sus propios comentarios
+  - Enviar mensajes privados a otros usuarios
+  - Editar y eliminar sus propios mensajes
+
+### 2. Moderador
+Gestión de Usuarios:
+  - Ver perfiles de todos los usuarios (excepto administradores)
+  - No puede crear nuevo contenido propio
+
+Control de Contenido:
+  - Editar o eliminar cualquier álbum
+  - Editar o eliminar cualquier canción
+  - Editar o eliminar cualquier playlist
+  - Editar o eliminar cualquier comentario
+  - Editar o eliminar cualquier mensaje
+
+Visualización:
+  - Acceso total para ver todo el contenido
+  - Ver estadísticas y reportes
+  - Ver logs de actividad
+
+Restricciones:
+  - No puede crear álbumes propios
+  - No puede crear playlists propias
+  - No puede subir canciones
+  - No puede seguir a otros usuarios
+
+### Características Comunes
+Ambos tipos de usuario pueden:
+  - Iniciar y cerrar sesión
+  - Ver el contenido público
+  - Ver sus datos de sesión (última conexión, total de seguidores, total de seguidos, total de álbumes)
+  - Usar el sistema de búsqueda (con restricciones según su rol)
+
+
+
+Consideraciones: 
+
+     - El formulario de registro tiene campos exclusivos para cada tipo de usuario
+     - Acceder al login:
+            Usuario cliente: DavidBowie Pssword: DavidBowie@1
+            Usuario Moderador: Moderador1 Pssword: Cambiada@1
+
+     - Las variables de sesión aparecen en el menú desplegable de arriba a la derecha, al igual que el log out
+
+     - Filtro de búsqueda según tipo de usuario:
+            El usuario moderador puede ver e interactuar con otros moderadores y todos los usuarios cliente.
+            El usuario cliente solo puede ver e interactuar con otros usuarios. A menos que un moderador escriba un mensaje privado
+
+     - En la página de login aparece un link para recuperar la contraseña.
+            Puedes probar con el correo moderador1@socialsound.com para que aparezcan las indicaciones por consola
+     
+     
 
 
 

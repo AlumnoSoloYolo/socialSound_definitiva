@@ -70,10 +70,15 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
 class Cliente(models.Model):
     usuario = models.OneToOneField(Usuario, related_name="cliente", on_delete=models.CASCADE)
-    
+    genero_favorito = models.CharField(max_length=100, blank=True, null=True)
+    artista_favorito = models.CharField(max_length=100, blank=True, null=True)
+    acepta_terminos = models.BooleanField(default=False)
 
 class Moderador(models.Model):
     usuario = models.OneToOneField(Usuario, related_name="moderador", on_delete=models.CASCADE)
+    experiencia_moderacion = models.PositiveIntegerField(default=0)
+    area_especialidad = models.CharField(max_length=100, blank=True, null=True)  # Añadido null=True
+    codigo_moderador = models.CharField(max_length=10, unique=True, blank=True, null=True)  # Añadido null=True
     
 
 

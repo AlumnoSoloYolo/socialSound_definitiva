@@ -1,13 +1,21 @@
 {% extends 'principal.html' %}
+{% load static %}
+
+{% block custom_css %}
+<link rel="stylesheet" href="{% static 'css/fondo_estrella.css' %}">
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+{% endblock %}
 
 {% block contenido %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
+<div class="container-index container-star">
+    <div class="stars"></div>
+    <div class="login-card w-50">
+        <div class="login-header">
             <h2>Editar Álbum</h2>
         </div>
-        <div class="card-body">
-            <form method="post" enctype="multipart/form-data">
+        
+            <form method="post" class="p-4" enctype="multipart/form-data">
                 {% csrf_token %}
                 
                 <h4>Información del Álbum</h4>
@@ -47,7 +55,7 @@
                     <a href="{% url 'perfil_usuario' request.user.nombre_usuario %}" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
-        </div>
+       
     </div>
 </div>
 {% endblock %}

@@ -52,7 +52,10 @@
                     <!-- Enlace para registrarse -->
                     <div class="text-center mt-4">
                         <p class="mb-0">¿Aún no tienes cuenta? 
-                            <a href="{% url 'registro_usuario' %}" class="register-link">Regístrate aquí</a>
+                            <a href="{% url 'registro_usuario' %}" class="login-link">Regístrate aquí</a>
+                        </p>
+                        <p class="mb-0">¿Olvidaste tu contraseña?
+                            <a href="{% url 'password_reset' %}" class="login-link">Haz clic aquí</a>
                         </p>
                     </div>
                 </form>

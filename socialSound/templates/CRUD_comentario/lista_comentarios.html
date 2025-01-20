@@ -25,7 +25,8 @@
                                 </p>
                             </div>
                         </div>
-                        {% if user.is_authenticated and user == comentario.usuario %}
+                        {% if user.is_authenticated and user == comentario.usuario or request.user.is_authenticated and request.user.rol == 2 %}
+                        
                         <div>
                             <a href="{% url 'editar_comentario' album.id comentario.id %}" 
                             class="btn btn-link text-primary p-0 me-2">

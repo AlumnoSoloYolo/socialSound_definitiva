@@ -5,8 +5,51 @@ from datetime import date
 import re
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.contrib.auth.forms import SetPasswordForm
+
+
+class CustomSetPasswordForm(SetPasswordForm):
+    def clean_new_password1(self):
+        password = self.cleaned_data.get('new_password1')
+        
+        # Check password length
+        if len(password) < 8:
+            raise forms.ValidationError("Password must be at least 8 characters long.")
+        
+        # Check for at least one uppercase letter
+        if not re.search(r'[A-Z]', password):
+            raise forms.ValidationError("Password must contain at least one uppercase letter.")
+        
+        # Check for at least one lowercase letter
+        if not re.search(r'[a-z]', password):
+            raise forms.ValidationError("Password must contain at least one lowercase letter.")
+        
+        # Check for at least one digit
+        if not re.search(r'\d', password):
+            raise forms.ValidationError("Password must contain at least one number.")
+        
+        # Check for at least one special character
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            raise forms.ValidationError("Password must contain at least one special character.")
+        
+        return password
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+       
+        self.fields['new_password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Nueva contraseña'
+        })
+        self.fields['new_password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Confirmar nueva contraseña'
+        })
+
 
 class UsuarioModelForm(ModelForm):
+    # Campos originales
     email = forms.CharField(
         required=False,  
         widget=forms.EmailInput(attrs={'class': 'form-control'})
@@ -24,6 +67,34 @@ class UsuarioModelForm(ModelForm):
         choices=Usuario.ROLES,
         required=True,
         widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    # Nuevos campos para Cliente
+    genero_favorito = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+    artista_favorito = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+    acepta_terminos = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+    # Nuevos campos para Moderador
+    experiencia_moderacion = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    area_especialidad = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    codigo_moderador = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
     )
 
     class Meta:
@@ -51,6 +122,7 @@ class UsuarioModelForm(ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
+        # Validaciones originales
         # Email
         email = cleaned_data.get('email', '')
         if not email.strip():
@@ -74,9 +146,48 @@ class UsuarioModelForm(ModelForm):
             self.add_error('password', 'Este campo es requerido.')
         elif not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', password):
             self.add_error('password', 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)')
+
+        # Validaciones específicas según el rol
+        rol = cleaned_data.get('rol')
+
+        if rol == str(Usuario.CLIENTE):
+            # Validaciones para Cliente
+            if not cleaned_data.get('acepta_terminos'):
+                self.add_error('acepta_terminos', 'Debes aceptar los términos y condiciones')
+                
+        elif rol == str(Usuario.MODERADOR):
+            # Validaciones para Moderador
+            codigo = cleaned_data.get('codigo_moderador')
+            if not codigo:
+                self.add_error('codigo_moderador', 'El código de moderador es obligatorio')
+            elif not codigo.startswith('MOD-'):
+                self.add_error('codigo_moderador', 'El código debe empezar con "MOD-"')
+                
+            experiencia = cleaned_data.get('experiencia_moderacion')
+            if not experiencia:
+                self.add_error('experiencia_moderacion', 'La experiencia es obligatoria')
+            elif experiencia < 1:
+                self.add_error('experiencia_moderacion', 'Debes tener al menos 1 año de experiencia')
+
+            area = cleaned_data.get('area_especialidad')
+            if not area:
+                self.add_error('area_especialidad', 'El área de especialidad es obligatoria')
             
         return cleaned_data
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacer campos condicionales según el rol
+        if 'data' in kwargs:
+            rol = kwargs['data'].get('rol')
+            if rol == str(Usuario.CLIENTE):
+                self.fields['codigo_moderador'].widget = forms.HiddenInput()
+                self.fields['experiencia_moderacion'].widget = forms.HiddenInput()
+                self.fields['area_especialidad'].widget = forms.HiddenInput()
+            elif rol == str(Usuario.MODERADOR):
+                self.fields['genero_favorito'].widget = forms.HiddenInput()
+                self.fields['artista_favorito'].widget = forms.HiddenInput()
+                self.fields['acepta_terminos'].widget = forms.HiddenInput()
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -624,7 +735,6 @@ class BusquedaAvanzadaComentarioForm(forms.Form):
 
 # MIRAR!!!!!
 class PlaylistForm(ModelForm):
-
     canciones = forms.ModelMultipleChoiceField(
         queryset=Cancion.objects.all(),
         required=False,
@@ -652,11 +762,15 @@ class PlaylistForm(ModelForm):
             })
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields['canciones'].initial = self.instance.canciones.all()
+
     def clean(self):
         cleaned_data = super().clean()
         nombre = cleaned_data.get('nombre')
         descripcion = cleaned_data.get('descripcion')
-        canciones = cleaned_data.get('canciones')
         
         if nombre and len(nombre) < 3:
             self.add_error('nombre', 'El nombre de la playlist debe tener al menos 3 caracteres.')
@@ -665,22 +779,6 @@ class PlaylistForm(ModelForm):
             self.add_error('descripcion', 'La descripción no puede tener más de 500 caracteres.')
 
         return cleaned_data
-
-    def save(self, commit=True):
-        playlist = super().save(commit=False)
-        if commit:
-            playlist.save()
-            # Guardamos las canciones seleccionadas
-            if self.cleaned_data.get('canciones'):
-                # Limpiamos las canciones existentes
-                playlist.canciones.clear()
-                # Agregamos las nuevas canciones seleccionadas
-                for i, cancion in enumerate(self.cleaned_data['canciones']):
-                    playlist.cancionplaylist_set.create(
-                        cancion=cancion,
-                        orden=i
-                    )
-        return playlist
 
 class BusquedaAvanzadaPlaylistForm(forms.Form):
     nombre = forms.CharField(

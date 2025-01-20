@@ -1,5 +1,7 @@
 from django.urls import path, re_path
+from django.contrib.auth import views as auth_views
 from .import views
+from .forms import CustomSetPasswordForm
 
 urlpatterns = [
      path('registro/', views.registro_usuario, name='registro_usuario'),
@@ -32,11 +34,39 @@ urlpatterns = [
      path('mensaje/editar/<int:mensaje_id>/', views.editar_mensaje, name='editar_mensaje'),
      path('chats/', views.lista_chats, name='lista_chats'),
      path('mensaje/eliminar/<int:mensaje_id>/', views.eliminar_mensaje, name='eliminar_mensaje'),
+     
 
+     #password reset aquí
+     path('password-reset/', 
+            auth_views.PasswordResetView.as_view(
+                template_name='password_reset.html',  
+                success_url='/password-reset/done/'
+            ), 
+            name='password_reset'),
+        
+     path('password-reset/done/', 
+            auth_views.PasswordResetDoneView.as_view(
+                template_name='password_reset_done.html'  
+            ), 
+            name='password_reset_done'),
+        
+     path('password-reset-confirm/<uidb64>/<token>/', 
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name='password_reset_confirm.html',
+            form_class=CustomSetPasswordForm,  
+            success_url='/password-reset-complete/'
+        ), 
+        name='password_reset_confirm'),
+        
+     path('password-reset-complete/', 
+            auth_views.PasswordResetCompleteView.as_view(
+                template_name='password_reset_complete.html' 
+            ), 
+            name='password_reset_complete'),
+    
 
      path('usuarios/<str:nombre_usuario>/seguidores/', views.lista_seguidores, name='usuarios_seguidores'),
      path('usuarios/<str:nombre_usuario>/seguidos/', views.lista_seguidos, name='usuarios_seguidos'),
-
      path('', views.index, name='index'),  # Página de inicio con enlaces a todas las URLs
      path('mensajes_privados/<int:emisor_id>/<int:receptor_id>/', views.mensajes_privados, name='mensajes_privados'),
      re_path(r'^perfil_usuario/(?P<nombre_usuario>[a-zA-Z0-9_]+)/$', views.perfil_usuario, name='perfil_usuario'),

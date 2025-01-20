@@ -1,16 +1,21 @@
 {% extends 'principal.html' %}
 {% load static %}
 
+{% block custom_css %}
+<link rel="stylesheet" href="{% static 'css/fondo_estrella.css' %}">
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+{% endblock %}
+
 {% block contenido %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
+<div class="container-index container-star">
+    <div class="stars"></div>
+                <div class="login-card w-50">
+                <div class="login-header">
                     <h2 class="mb-0">{{ title }}</h2>
                 </div>
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
+             
+                    <form method="POST" class="p-4" enctype="multipart/form-data">
                         {% csrf_token %}
                         
                         <div class="mb-4">
@@ -50,7 +55,7 @@
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-warning">
                                 Añadir canción
                             </button>
                             <a href="{% url 'canciones_album' album_id=album.id %}" class="btn btn-secondary">
@@ -59,8 +64,6 @@
                         </div>
                     </form>
                 </div>
-            </div>
-        </div>
-    </div>
+          
 </div>
 {% endblock %}

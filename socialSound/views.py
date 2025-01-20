@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from datetime import date
 from django.contrib.auth import logout
 from django.db import transaction
@@ -47,26 +47,39 @@ def crear_usuario(form):
     usuario_creado = False
     if form.is_valid():
         try:
-            usuario = form.save(commit=False)
-            raw_password = form.cleaned_data.get('password')
-            usuario.set_password(raw_password)
-            
-            if not usuario.foto_perfil:
-                usuario.foto_perfil = 'media/fotos_perfil/default_profile.png'
+            with transaction.atomic():
+                usuario = form.save(commit=False)
+                raw_password = form.cleaned_data.get('password')
+                usuario.set_password(raw_password)
                 
-            usuario.save()
-            rol = int(form.cleaned_data.get('rol'))
-            if(rol == Usuario.CLIENTE):
-                grupo = Group.objects.get(name='Cliente') 
-                grupo.user_set.add(usuario)
-                cliente = Cliente.objects.create( usuario = usuario)
-                cliente.save()
-            elif(rol == Usuario.MODERADOR):
-                grupo = Group.objects.get(name='Moderador') 
-                grupo.user_set.add(usuario)
-                modedaror = Moderador.objects.create(usuario = usuario)
-                modedaror.save()
-            usuario_creado = True
+                if not usuario.foto_perfil:
+                    usuario.foto_perfil = 'media/fotos_perfil/default_profile.png'
+                    
+                usuario.save()
+                rol = int(form.cleaned_data.get('rol'))
+                
+                if rol == Usuario.CLIENTE:
+                    grupo = Group.objects.get(name='Cliente') 
+                    grupo.user_set.add(usuario)
+                    cliente = Cliente.objects.create(
+                        usuario=usuario,
+                        genero_favorito=form.cleaned_data.get('genero_favorito'),
+                        artista_favorito=form.cleaned_data.get('artista_favorito'),
+                        acepta_terminos=form.cleaned_data.get('acepta_terminos')
+                    )
+                    cliente.save()
+                elif rol == Usuario.MODERADOR:
+                    grupo = Group.objects.get(name='Moderador') 
+                    grupo.user_set.add(usuario)
+                    moderador = Moderador.objects.create(
+                        usuario=usuario,
+                        experiencia_moderacion=form.cleaned_data.get('experiencia_moderacion'),
+                        area_especialidad=form.cleaned_data.get('area_especialidad'),
+                        codigo_moderador=form.cleaned_data.get('codigo_moderador')
+                    )
+                    moderador.save()
+                    
+                usuario_creado = True
         except Exception as error:
             print(error)
     
@@ -142,6 +155,7 @@ def actualizar_perfil(request, nombre_usuario):
     })
 
 @login_required
+@permission_required('socialSound.delete_usuario')
 def eliminar_usuario(request, nombre_usuario):
     usuario = Usuario.objects.get(nombre_usuario=nombre_usuario)
     try:
@@ -151,12 +165,21 @@ def eliminar_usuario(request, nombre_usuario):
     return redirect('login_usuario')
 
 @login_required
+@login_required
 def busqueda_avanzada_usuarios(request):
     form = BusquedaAvanzadaUsuarioForm(request.GET or None)
-    usuarios = Usuario.objects.all()
+    
+    # Iniciar el queryset base según el rol del usuario
+    if request.user.rol == Usuario.MODERADOR:
+        # Los moderadores pueden ver todos los usuarios
+        usuarios = Usuario.objects.all().exclude(is_superuser=True)
+    else:
+        # Los clientes solo pueden ver otros clientes
+         usuarios = Usuario.objects.filter(rol=Usuario.CLIENTE).exclude(is_superuser=True)
+
     filtros_aplicados = []
 
-    # Solo procesar si hay datos GET
+   
     if request.GET:
         if form.is_valid():
             if nombre_usuario := form.cleaned_data.get('nombre_usuario'):
@@ -182,11 +205,15 @@ def busqueda_avanzada_usuarios(request):
                 filtros_aplicados.append(f"Biografía contiene: {bio}")
         else:
             filtros_aplicados.append("Error en los filtros ingresados")
+
+    # Excluir al usuario actual de los resultados
+    usuarios = usuarios.exclude(id=request.user.id)
     
     return render(request, 'CRUD_usuario/busqueda_avanzada_usuarios.html', {
         'form': form,
         'usuarios': usuarios,
-        'filtros_aplicados': filtros_aplicados
+        'filtros_aplicados': filtros_aplicados,
+        'es_moderador': request.user.rol == Usuario.MODERADOR  
     })
 
 @login_required
@@ -205,6 +232,7 @@ def dejar_de_seguir_usuario(request, usuario_id):
 ### CRUD Álbum
 
 @login_required
+@permission_required('socialSound.add_album')
 def crear_album(request, nombre_usuario):
     if request.user.nombre_usuario != nombre_usuario:
         return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
@@ -255,6 +283,7 @@ def crear_album_completo(album_form, detalle_form, usuario):
 
 
 @login_required
+@permission_required('socialSound.change_album')
 def editar_album(request, nombre_usuario, album_id):
     
     album = Album.objects.select_related('detalle_album').get(id=album_id)
@@ -325,6 +354,7 @@ def busqueda_avanzada_album(request):
 
 
 @login_required
+@permission_required('socialSound.delete_album')
 def eliminar_album(request, album_id):
    
     album = Album.objects.get(id=album_id)
@@ -342,6 +372,7 @@ def eliminar_album(request, album_id):
 
 ### CRUD cancion
 @login_required
+@permission_required('socialSound.add_album', 'socialSound.add_cancion')
 def crear_album_con_canciones(request, nombre_usuario):
     if request.user.nombre_usuario != nombre_usuario:
         return redirect('perfil_usuario', nombre_usuario=request.user.nombre_usuario)
@@ -414,6 +445,7 @@ def crear_album_con_canciones(request, nombre_usuario):
 
 
 @login_required
+@permission_required('socialSound.change_cancion')
 def editar_cancion(request, cancion_id):
     try:
         cancion = Cancion.objects.get(id=cancion_id)
@@ -457,6 +489,7 @@ def editar_cancion(request, cancion_id):
     })
 
 @login_required
+@permission_required('socialSound.delete_cancion')
 def eliminar_cancion(request, cancion_id):
     cancion = Cancion.objects.get(id=cancion_id)
     album_id = cancion.album.id
@@ -470,6 +503,7 @@ def eliminar_cancion(request, cancion_id):
 
 
 @login_required
+@permission_required('socialSound.add_cancion')
 def agregar_cancion_album(request, album_id):
     album = Album.objects.get(id=album_id)
     
@@ -533,6 +567,7 @@ def busqueda_avanzada_canciones(request):
 
 ### CRUD Comentario
 @login_required
+@permission_required('socialSound.add_comentario')
 def crear_comentario(request, album_id):
     album = Album.objects.get(id=album_id)
     
@@ -573,10 +608,11 @@ def crear_comentario_album(form, usuario, album):
 
 
 @login_required
+@permission_required('socialSound.change_comentario')
 def actualizar_comentario(request, album_id, comentario_id):
     try:
         album = Album.objects.get(id=album_id)
-        comentario = Comentario.objects.get(id=comentario_id, usuario=request.user)
+        comentario = Comentario.objects.get(id=comentario_id)
     except Album.DoesNotExist:
         messages.error(request, 'El álbum no existe')
         return redirect('home') 
@@ -648,18 +684,18 @@ def busqueda_avanzada_comentarios(request, album_id):
 
 
 @login_required
+@permission_required('socialSound.delete_comentario')
 def eliminar_comentario(request, album_id, comentario_id):
     comentario = Comentario.objects.get(id=comentario_id, album_id=album_id)
-    if request.user == comentario.usuario:
-        try:
-           comentario.delete()
-        except:
-            pass
+   
+    comentario.delete()
+       
     return redirect('comentarios_album', album_id=album_id)
 
 
 ## CRUD playlists
 @login_required
+@permission_required('socialSound.add_playlist')
 def crear_playlist_usuario(form, usuario):
    
     try:
@@ -684,56 +720,42 @@ def crear_playlist_usuario(form, usuario):
         print(f"Error al crear playlist: {str(e)}")
         return False
 
+@login_required
+@permission_required('socialSound.add_playlist')
 def crear_playlist(request):
-    datosFormulario = None
     if request.method == "POST":
-        datosFormulario = request.POST
-        
-    # Inicializar el formulario con los datos o None
-    form = PlaylistForm(datosFormulario)
-    
-    if request.method == "POST":
-        # Intentar crear la playlist con las canciones seleccionadas
-        playlist_creada = crear_playlist_usuario(form, request.user)
-        
-        if playlist_creada:
+        form = PlaylistForm(request.POST)
+        if form.is_valid():
+            playlist = form.save(commit=False)
+            playlist.usuario = request.user
+            playlist.save()
+            form.save_m2m()
             messages.success(request, 'Playlist creada exitosamente')
             return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
         else:
             messages.error(request, 'Error al crear la playlist. Por favor verifica los datos ingresados.')
-    
-    # Obtener todas las canciones disponibles para el contexto
+    else:
+        form = PlaylistForm()
+
     return render(request, 'CRUD_playlist/crear_playlist.html', {
         'form': form,
         'title': 'Crear Nueva Playlist'
     })
-
 @login_required
+@permission_required('socialSound.change_playlist')
 def editar_playlist(request, playlist_id):
-    try:
-        playlist = Playlist.objects.get(id=playlist_id, usuario=request.user)
-    except Playlist.DoesNotExist:
-        messages.error(request, 'La playlist no existe o no tienes permiso para editarla')
-        return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
-    
-    datosFormulario = None
+    playlist = Playlist.objects.get(id=playlist_id)
     
     if request.method == "POST":
-        datosFormulario = request.POST
-    
-    formulario = PlaylistForm(datosFormulario, instance=playlist)
-    
-    if request.method == "POST":
+        formulario = PlaylistForm(request.POST, instance=playlist)
         if formulario.is_valid():
-            try:
-                formulario.save()
-                messages.success(request, f'Se ha editado la playlist {formulario.cleaned_data.get("nombre")} correctamente')
-                return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
-            except Exception as error:
-                print(error) 
-                messages.error(request, 'Ha ocurrido un error al actualizar la playlist')
+            formulario.save()
+            messages.success(request, f'Se ha editado la playlist {formulario.cleaned_data.get("nombre")} correctamente')
+            return redirect('lista_playlist', nombre_usuario=playlist.usuario.nombre_usuario)
         else:
             messages.error(request, 'Por favor, corrija los errores en el formulario')
+    else:
+        formulario = PlaylistForm(instance=playlist)
 
     return render(request, 'CRUD_playlist/editar_playlist.html', {
         'form': formulario,
@@ -770,6 +792,7 @@ def busqueda_avanzada_playlists(request):
 
 
 @login_required
+@permission_required('socialSound.add_cancion')
 def agregar_cancion_playlist(request, playlist_id):
     playlist = Playlist.objects.get(id=playlist_id)
     
@@ -797,6 +820,7 @@ def agregar_cancion_playlist(request, playlist_id):
     })
 
 @login_required
+@permission_required('socialSound.add_mensajeprivado')
 def crear_mensaje_privado(request, usuario_id):
     try:
         otro_usuario = Usuario.objects.get(id=usuario_id)
@@ -833,6 +857,7 @@ def crear_mensaje_privado(request, usuario_id):
         return redirect('home')
 
 @login_required
+@permission_required('socialSound.add_mensajeprivado')
 def crear_mensaje(form, emisor, receptor):
     if form.is_valid():
         try:
@@ -904,6 +929,7 @@ def lista_chats(request):
 
 
 @login_required
+@permission_required('socialSound.change_mensajeprivado')
 def editar_mensaje(request, mensaje_id):
   
     mensaje = MensajePrivado.objects.get(id=mensaje_id)
@@ -934,26 +960,37 @@ def editar_mensaje(request, mensaje_id):
     })
 
 @login_required
+@permission_required('socialSound.delete_mensajeprivado')
 def eliminar_mensaje(request, mensaje_id):
     mensaje = MensajePrivado.objects.get(id=mensaje_id)
-    receptor_id = mensaje.receptor.id
+    
+    # Si es moderador, necesitamos identificar el contexto del chat
+    if request.user.rol == 2:
+        # Si el moderador está viendo el chat entre emisor y receptor,
+        # queremos mantener ese contexto
+        chat_usuario_id = mensaje.emisor.id if request.user == mensaje.receptor else mensaje.receptor.id
+    else:
+        # Para usuarios normales, vamos al chat con el receptor
+        chat_usuario_id = mensaje.receptor.id
 
-    if request.user == mensaje.emisor:
+    # Verificar si el usuario puede eliminar el mensaje
+    if request.user == mensaje.emisor or request.user.rol == 2:
         try:
             mensaje.delete()
             messages.success(request, "Se ha eliminado el mensaje correctamente")
-        except:
-            pass
-            
-       
+        except Exception as e:
+            messages.error(request, "Error al eliminar el mensaje")
+            print(f"Error al eliminar mensaje: {e}")
     
-    return redirect('chat', usuario_id=mensaje.receptor.id)
+    return redirect('chat', usuario_id=chat_usuario_id)
 
 
 
 @login_required
+@permission_required('socialSound.delete_playlist')
 def eliminar_playlist(request, playlist_id):
     playlist = Playlist.objects.get(id=playlist_id)
+    playlist_owner = playlist.usuario
    
     try:
         playlist.delete()
@@ -964,7 +1001,7 @@ def eliminar_playlist(request, playlist_id):
        
     else:
         
-        return redirect('lista_playlist', nombre_usuario=request.user.nombre_usuario)
+        return redirect('lista_playlist', nombre_usuario=playlist_owner.nombre_usuario)
 
 
 

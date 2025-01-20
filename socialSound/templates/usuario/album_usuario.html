@@ -53,7 +53,7 @@
                                                     </a>
                                                 </div>
                                                 
-                                                {% if request.user == album.usuario %}
+                                                {% if request.user.is_authenticated and request.user == usuario or request.user.is_authenticated and request.user.rol == 2 %}
                                                     <div class="d-grid w-100">
                                                         <div class="dropdown w-100">
                                                             <button class="btn btn-outline-light dropdown-toggle retro-btn w-100" 
