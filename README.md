@@ -712,7 +712,7 @@ Usado en: campos de edad
 
 
 
-# subir arcihvos
+# subir archivos
 
 Configura los ajustes de medios:
 
